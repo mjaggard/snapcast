@@ -110,6 +110,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
+
         setContentView(R.layout.activity_main);
 
         for (int rate : new int[]{8000, 11025, 16000, 22050, 44100, 48000}) {  // add the rates you wish to check against
@@ -151,6 +154,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             }
         }).start();
 
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     public void checkFirstRun() {
