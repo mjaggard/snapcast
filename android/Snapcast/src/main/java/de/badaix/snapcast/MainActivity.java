@@ -46,6 +46,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -111,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
+        MobileAds.initialize(this, "");
 
         setContentView(R.layout.activity_main);
 
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             }
         }).start();
 
-        mAdView = findViewById(R.id.adView);
+        final AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -279,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         i.setAction(SnapclientService.ACTION_START);
 
         startService(i);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     private void stopSnapclient() {
@@ -287,7 +292,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 //        stopService(new Intent(this, SnapclientService.class));
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
-
 
     private void startRemoteControl() {
         if (remoteControl == null)

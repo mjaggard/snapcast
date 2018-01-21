@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
-            android:maxLines="1"
+            android:singleLine="true"
             android:paddingBottom="1dp"
             android:paddingLeft="5dp"
             android:paddingTop="2dp"
