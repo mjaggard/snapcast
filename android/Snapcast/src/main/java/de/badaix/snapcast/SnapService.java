@@ -39,30 +39,30 @@ import java.io.InputStreamReader;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 
 /**
- * Created by johannes on 01.01.16.
+ * Created by mat on 23/01/18.
  */
 
-public class SnapclientService extends Service {
-
+public abstract class SnapService extends Service {
     public static final String EXTRA_HOST = "EXTRA_HOST";
     public static final String EXTRA_PORT = "EXTRA_PORT";
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_STOP = "ACTION_STOP";
     private final IBinder mBinder = new LocalBinder();
-    private java.lang.Process process = null;
-    private PowerManager.WakeLock wakeLock = null;
-    private WifiManager.WifiLock wifiWakeLock = null;
-    private Thread reader = null;
-    private boolean running = false;
-    private SnapclientListener listener = null;
+    private Process process;
+    private PowerManager.WakeLock wakeLock;
+    private WifiManager.WifiLock wifiWakeLock;
+    private boolean running;
+    private LogListener logListener;
     private boolean logReceived;
+    private StopListener stopListener;
+    private StartListener startListener;
 
     public boolean isRunning() {
         return running;
     }
 
-    public void setListener(SnapclientListener listener) {
-        this.listener = listener;
+    public void setLogListener(LogListener listener) {
+        this.logListener = listener;
     }
 
     @Override
@@ -74,22 +74,11 @@ public class SnapclientService extends Service {
             stopService();
             return START_NOT_STICKY;
         } else if (intent.getAction().equals(ACTION_START)) {
-            String host = intent.getStringExtra(EXTRA_HOST);
-            int port = intent.getIntExtra(EXTRA_PORT, 1704);
-
-            Intent stopIntent = new Intent(this, SnapclientService.class);
+            Intent stopIntent = new Intent(this, getClass());
             stopIntent.setAction(ACTION_STOP);
             PendingIntent piStop = PendingIntent.getService(this, 0, stopIntent, 0);
 
-            NotificationCompat.Builder builder =
-                    new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.ic_media_play)
-                            .setTicker(getText(R.string.ticker_text))
-                            .setContentTitle(getText(R.string.notification_title))
-                            .setContentText(getText(R.string.notification_text))
-                            .setContentInfo(host)
-                            .setStyle(new NotificationCompat.BigTextStyle().bigText(getText(R.string.notification_text)))
-                            .addAction(R.drawable.ic_media_stop, getString(R.string.stop), piStop);
+            NotificationCompat.Builder builder = createStopNotificationBuilder(intent, piStop);
 
             Intent resultIntent = new Intent(this, MainActivity.class);
 
@@ -112,11 +101,15 @@ public class SnapclientService extends Service {
             final Notification notification = builder.build();
             startForeground(123, notification);
 
+            String host = intent.getStringExtra(EXTRA_HOST);
+            int port = intent.getIntExtra(EXTRA_PORT, 1704);
             start(host, port);
             return START_STICKY;
         }
         return START_NOT_STICKY;
     }
+
+    protected abstract NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop);
 
     @Override
     public void onDestroy() {
@@ -128,11 +121,7 @@ public class SnapclientService extends Service {
         return mBinder;
     }
 
-    public void stopPlayer() {
-        stopService();
-    }
-
-    private void stopService() {
+    public void stopService() {
         stop();
         stopForeground(true);
         NotificationManager mNotificationManager =
@@ -169,7 +158,7 @@ public class SnapclientService extends Service {
                     String line;
                     try {
                         while ((line = bufferedReader.readLine()) != null) {
-                            log(line);
+                            logFromNative(line);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -189,32 +178,30 @@ public class SnapclientService extends Service {
 */
         } catch (Exception e) {
             e.printStackTrace();
-            if (listener != null)
-                listener.onError(this, e.getMessage(), e);
+            if (logListener != null)
+                logListener.onError(this, e.getMessage(), e);
             stop();
         }
     }
 
-    private void log(String msg) {
+    private void logFromNative(String msg) {
         if (!logReceived) {
             logReceived = true;
             running = true;
-            if (listener != null)
-                listener.onPlayerStart(this);
+            if (startListener != null)
+                startListener.onStart(this);
         }
-        if (listener != null) {
+        if (logListener != null) {
             int idxBracketOpen = msg.indexOf('[');
             int idxBracketClose = msg.indexOf(']', idxBracketOpen);
             if ((idxBracketOpen > 0) && (idxBracketClose > 0)) {
-                listener.onLog(SnapclientService.this, msg.substring(0, idxBracketOpen - 1), msg.substring(idxBracketOpen + 1, idxBracketClose), msg.substring(idxBracketClose + 2));
+                logListener.onLog(SnapService.this, msg.substring(0, idxBracketOpen - 1), msg.substring(idxBracketOpen + 1, idxBracketClose), msg.substring(idxBracketClose + 2));
             }
         }
     }
 
     private void stop() {
         try {
-            if (reader != null)
-                reader.interrupt();
             if (process != null)
                 process.destroy();
             if ((wakeLock != null) && wakeLock.isHeld())
@@ -226,18 +213,30 @@ public class SnapclientService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (listener != null)
-            listener.onPlayerStop(this);
+        if (stopListener != null)
+            stopListener.onStop(this);
     }
 
-    public interface SnapclientListener {
-        void onPlayerStart(SnapclientService snapclientService);
+    public void setStopListener(StopListener stopListener) {
+        this.stopListener = stopListener;
+    }
 
-        void onPlayerStop(SnapclientService snapclientService);
+    public void setStartListener(StartListener startListener) {
+        this.startListener = startListener;
+    }
 
-        void onLog(SnapclientService snapclientService, String timestamp, String logClass, String msg);
+    public interface LogListener {
+        void onLog(SnapService snapService, String timestamp, String logClass, String msg);
 
-        void onError(SnapclientService snapclientService, String msg, Exception exception);
+        void onError(SnapService snapService, String msg, Exception exception);
+    }
+
+    public interface StartListener {
+        void onStart(SnapService snapService);
+    }
+
+    public interface StopListener {
+        void onStop(SnapService snapService);
     }
 
     /**
@@ -245,14 +244,9 @@ public class SnapclientService extends Service {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        SnapclientService getService() {
+        SnapService getService() {
             // Return this instance of LocalService so clients can call public methods
-            return SnapclientService.this;
+            return SnapService.this;
         }
     }
-
 }
-
-
-
-

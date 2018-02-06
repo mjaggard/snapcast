@@ -38,11 +38,11 @@ public class BootCompleteReceiver extends BroadcastReceiver {
                 if (TextUtils.isEmpty(host))
                     return;
 
-                Intent i = new Intent(context, SnapclientService.class);
+                Intent i = new Intent(context, SnapClientService.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                i.putExtra(SnapclientService.EXTRA_HOST, host);
-                i.putExtra(SnapclientService.EXTRA_PORT, port);
-                i.setAction(SnapclientService.ACTION_START);
+                i.putExtra(SnapClientService.EXTRA_HOST, host);
+                i.putExtra(SnapClientService.EXTRA_PORT, port);
+                i.setAction(SnapClientService.ACTION_START);
 
                 context.startService(i);
             }

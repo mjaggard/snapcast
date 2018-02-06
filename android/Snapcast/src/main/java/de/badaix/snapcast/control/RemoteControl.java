@@ -226,6 +226,8 @@ public class RemoteControl implements TcpClient.TcpClientListener {
     }
 
     public void getServerStatus() {
+        if (tcpClient == null)
+            return;
         RPCRequest request = jsonRequest("Server.GetStatus", null);
         tcpClient.sendMessage(request.toString());
     }

@@ -32,7 +32,7 @@ ifndef NDK_DIR
 	$(error android NDK_DIR is not set)
 endif
 ifndef ARCH
-	$(error ARCH is not set (arm, mips, x86))
+	$(error ARCH is not set (arm, aarch64, mips, x86))
 endif
 ifeq ($(ARCH), x86)
 	$(eval CPPFLAGS:=-DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN)
@@ -40,6 +40,9 @@ ifeq ($(ARCH), x86)
 else ifeq ($(ARCH), mips)
 	$(eval CPPFLAGS:=-DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321 -DBYTE_ORDER=BIG_ENDIAN)
 	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/mipsel-linux-android-)
+else ifeq ($(ARCH), aarch64)
+	$(eval CPPFLAGS:=-DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN)
+	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/aarch64-linux-android-)
 else
 	$(eval CPPFLAGS:=-U_ARM_ASSEM_)
 	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/arm-linux-androideabi-)

@@ -92,13 +92,16 @@ ifndef NDK_DIR
 	$(error android NDK_DIR is not set)
 endif
 ifndef ARCH
-	$(error ARCH is not set (arm, mips, x86))
+	$(error ARCH is not set (arm, aarch64, mips, x86))
 endif
 ifeq ($(ARCH), x86)
 	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/i686-linux-android-)
 else ifeq ($(ARCH), mips)
 	$(eval CXXFLAGS:=$(CXXFLAGS) -DIS_BIG_ENDIAN)
 	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/mipsel-linux-android-)
+else ifeq ($(ARCH), aarch64)
+	$(eval CXXFLAGS:=$(CXXFLAGS) -march=armv8a)
+	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/aarch64-linux-android-)
 else
 	$(eval CXXFLAGS:=$(CXXFLAGS) -march=armv7)
 	$(eval PROGRAM_PREFIX:=$(NDK_DIR)/bin/arm-linux-androideabi-)

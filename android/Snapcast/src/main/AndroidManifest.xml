@@ -31,7 +31,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".SnapclientService"/>
+        <service android:name=".SnapClientService"/>
 
         <!-- android:theme="@style/Theme.AppCompat.Light.DialogWhenLarge" -->
         <activity

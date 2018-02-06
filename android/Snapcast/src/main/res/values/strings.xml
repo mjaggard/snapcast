@@ -3,6 +3,9 @@
     <string name="ticker_text">Snapclient started</string>
     <string name="notification_title">Snapclient</string>
     <string name="notification_text">Snapclient is running…</string>
+    <string name="ticker_text_server">SnapServer started</string>
+    <string name="notification_title_server">SnapServer</string>
+    <string name="notification_text_server">SnapServer is running…</string>
     <string name="notification_info">info…</string>
     <string name="stop">stop</string>
     <string name="menu_details">Details</string>
@@ -32,6 +35,7 @@
     <string name="title_activity_group_preference">Group settings</string>
 
     <string name="action_play_stop">Play/Stop</string>
+    <string name="action_server_stop">Server Start/Stop</string>
     <string name="client_deleted">Client %1$s deleted</string>
     <string name="wrong_sample_rate">Stream not in native sample rate: %1$d\nNative sample rate: %2$d</string>
     <string name="unknown_sample_rate">Streams in non-native sample rate might not play in sync</string>
@@ -42,7 +46,7 @@
 
     <string name="client_stream">Stream</string>
     <string name="first_run_title">Warning</string>
-    <string name="first_run_text">This is just a test client.\nNot meant for production use.</string>
+    <string name="first_run_text">This is a test client / server.\nNot yet meant for production use.</string>
     <string name="host">Host</string>
     <string name="streaming_port">stream port</string>
     <string name="control_port">control port</string>

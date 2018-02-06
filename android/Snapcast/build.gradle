@@ -4,7 +4,9 @@ android {
     signingConfigs {
         config {
             keyAlias 'snapcast'
-
+            keyPassword 'Philipsnapcast'
+            storeFile file('/home/mat/dev/keystore-android')
+            storePassword 'Philip'
         }
     }
     compileSdkVersion 25
@@ -28,6 +30,9 @@ android {
         disable 'MissingTranslation'
     }
     productFlavors {
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
 
