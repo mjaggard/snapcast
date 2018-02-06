@@ -4,9 +4,9 @@ android {
     signingConfigs {
         config {
             keyAlias 'snapcast'
-            keyPassword 'Philipsnapcast'
+            keyPassword 'Passw0rdSnapCast'
             storeFile file('/home/mat/dev/keystore-android')
-            storePassword 'Philip'
+            storePassword 'SCPassw0rd'
         }
     }
     compileSdkVersion 25
@@ -14,7 +14,7 @@ android {
         applicationId 'uk.org.jaggard.snapcast'
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 1202
+        versionCode 1203
         versionName "0.12.02"
         multiDexEnabled true
         signingConfig signingConfigs.config

@@ -48,12 +48,12 @@ public abstract class SnapService extends Service {
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_STOP = "ACTION_STOP";
     private final IBinder mBinder = new LocalBinder();
-    private Process process;
-    private PowerManager.WakeLock wakeLock;
-    private WifiManager.WifiLock wifiWakeLock;
-    private boolean running;
-    private LogListener logListener;
-    private boolean logReceived;
+    protected Process process;
+    protected PowerManager.WakeLock wakeLock;
+    protected WifiManager.WifiLock wifiWakeLock;
+    protected boolean running;
+    protected LogListener logListener;
+    protected boolean logReceived;
     private StopListener stopListener;
     private StartListener startListener;
 
@@ -101,13 +101,13 @@ public abstract class SnapService extends Service {
             final Notification notification = builder.build();
             startForeground(123, notification);
 
-            String host = intent.getStringExtra(EXTRA_HOST);
-            int port = intent.getIntExtra(EXTRA_PORT, 1704);
-            start(host, port);
+            start(intent);
             return START_STICKY;
         }
         return START_NOT_STICKY;
     }
+
+    protected abstract void start(Intent intent);
 
     protected abstract NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop);
 
@@ -129,62 +129,7 @@ public abstract class SnapService extends Service {
         mNotificationManager.cancel(123);
     }
 
-    private void start(String host, int port) {
-        try {
-            //https://code.google.com/p/android/issues/detail?id=22763
-            if (running)
-                return;
-            File binary = new File(getFilesDir(), "snapclient");
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-
-            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "SnapcastWakeLock");
-            wakeLock.acquire();
-
-            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-            wifiWakeLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "SnapcastWifiWakeLock");
-            wifiWakeLock.acquire();
-
-            process = new ProcessBuilder()
-                    .command(binary.getAbsolutePath(), "-h", host, "-p", Integer.toString(port))
-                    .redirectErrorStream(true)
-                    .start();
-
-            Thread reader = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    BufferedReader bufferedReader = new BufferedReader(
-                            new InputStreamReader(process.getInputStream()));
-                    String line;
-                    try {
-                        while ((line = bufferedReader.readLine()) != null) {
-                            logFromNative(line);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            logReceived = false;
-            reader.start();
-
-            //TODO: wait for started message on stdout
-/*            long now = System.currentTimeMillis();
-            while (!logReceived) {
-                if (System.currentTimeMillis() > now + 1000)
-                    throw new Exception("start timeout");
-                Thread.sleep(100, 0);
-            }
-*/
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (logListener != null)
-                logListener.onError(this, e.getMessage(), e);
-            stop();
-        }
-    }
-
-    private void logFromNative(String msg) {
+    protected void logFromNative(String msg) {
         if (!logReceived) {
             logReceived = true;
             running = true;
@@ -200,7 +145,7 @@ public abstract class SnapService extends Service {
         }
     }
 
-    private void stop() {
+    protected void stop() {
         try {
             if (process != null)
                 process.destroy();

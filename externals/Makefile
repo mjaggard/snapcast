@@ -16,7 +16,7 @@
 
 .PHONY: all check-env flac ogg tremor
 
-all: flac ogg tremor
+all: flac ogg tremor vorbis
 
 check-env:
 #	if [ ! -d "flac" ]; then \
@@ -64,6 +64,17 @@ flac: check-env
 
 ogg: check-env
 	@cd ogg; \
+	export CC="$(CC)"; \
+	export CXX="$(CXX)"; \
+	export CPPFLAGS="$(CPPFLAGS)"; \
+	./autogen.sh; \
+	./configure --host=$(ARCH) --prefix=$(NDK_DIR); \
+	make; \
+	make install; \
+	make clean;
+
+vorbis: check-env
+	@cd vorbis; \
 	export CC="$(CC)"; \
 	export CXX="$(CXX)"; \
 	export CPPFLAGS="$(CPPFLAGS)"; \

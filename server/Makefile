@@ -46,10 +46,30 @@ endif
 
 ifeq ($(TARGET), ANDROID)
 
-CXX       = $(NDK_DIR)/bin/arm-linux-androideabi-g++
-STRIP     = $(NDK_DIR)/bin/arm-linux-androideabi-strip
+ifndef NDK_DIR
+	$(error android NDK_DIR is not set)
+endif
+ifndef ARCH
+	$(error ARCH is not set (arm, aarch64, mips, x86))
+endif
+ifeq ($(ARCH), x86)
+PROGRAM_PREFIX = $(NDK_DIR)/bin/i686-linux-android-
+else ifeq ($(ARCH), mips)
+CXXFLAGS += -DIS_BIG_ENDIAN
+PROGRAM_PREFIX = $(NDK_DIR)/bin/mipsel-linux-android-
+else ifeq ($(ARCH), aarch64)
+#CXXFLAGS += -march=aarch64
+PROGRAM_PREFIX = $(NDK_DIR)/bin/aarch64-linux-android-
+else
+CXXFLAGS += -march=armv7-a
+PROGRAM_PREFIX = $(NDK_DIR)/bin/arm-linux-androideabi-
+endif
+
+CXX       = $(PROGRAM_PREFIX)clang++
+STRIP     = $(PROGRAM_PREFIX)strip
 CXXFLAGS += -pthread -DNO_CPP11_STRING -fPIC -I$(NDK_DIR)/include
-LDFLAGS  += -L$(NDK_DIR)/lib -pie -llog -latomic
+#LDFLAGS  += -L$(NDK_DIR)/lib -pie -llog -latomic
+LDFLAGS   += -L$(NDK_DIR)/lib -pie -lvorbisidec -logg -lFLAC -lOpenSLES -latomic -llog -lvorbisenc
 
 else ifeq ($(TARGET), OPENWRT)
 
@@ -85,7 +105,10 @@ OBJ      += ../common/daemon.o publishZeroConf/publishAvahi.o
 endif
 
 
-all:	$(BIN)
+all:	check-env $(BIN)
+
+check-env:
+
 
 $(BIN): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $(BIN) $(OBJ) $(LDFLAGS)

@@ -57,6 +57,65 @@ public class SnapClientService extends SnapService {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(getText(R.string.notification_text)))
                 .addAction(R.drawable.ic_media_stop, getString(R.string.stop), piStop);
     }
+
+    @Override
+    protected void start(Intent intent) {
+        String host = intent.getStringExtra(EXTRA_HOST);
+        int port = intent.getIntExtra(EXTRA_PORT, 1704);
+
+        try {
+            //https://code.google.com/p/android/issues/detail?id=22763
+            if (running)
+                return;
+            File binary = new File(getFilesDir(), "snapserver");
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "SnapcastWakeLock");
+            wakeLock.acquire();
+
+            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+            wifiWakeLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "SnapcastWifiWakeLock");
+            wifiWakeLock.acquire();
+
+            process = new ProcessBuilder()
+                    .command(binary.getAbsolutePath(), "-h", host, "-p", Integer.toString(port))
+                    .redirectErrorStream(true)
+                    .start();
+
+            Thread reader = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    BufferedReader bufferedReader = new BufferedReader(
+                            new InputStreamReader(process.getInputStream()));
+                    String line;
+                    try {
+                        while ((line = bufferedReader.readLine()) != null) {
+                            logFromNative(line);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            logReceived = false;
+            reader.start();
+
+            //TODO: wait for started message on stdout
+/*            long now = System.currentTimeMillis();
+            while (!logReceived) {
+                if (System.currentTimeMillis() > now + 1000)
+                    throw new Exception("start timeout");
+                Thread.sleep(100, 0);
+            }
+*/
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (logListener != null)
+                logListener.onError(this, e.getMessage(), e);
+            stop();
+        }
+    }
 }
 
 

@@ -19,3 +19,6 @@
 [submodule "externals/aixlog"]
 	path = externals/aixlog
 	url = https://github.com/badaix/aixlog.git
+[submodule "externals/vorbis"]
+	path = externals/vorbis
+	url = git@github.com:xiph/vorbis.git
