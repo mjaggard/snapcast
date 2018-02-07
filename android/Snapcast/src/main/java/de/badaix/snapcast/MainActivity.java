@@ -45,8 +45,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private static final int GROUP_PROPERTIES_REQUEST = 2;
     private static final String TAG = "Main";
     private static final String SERVICE_NAME = "Snapcast";// #2";
-    private static final String[] BINARIES = new String[] {"snapclient", "snapserver"};
+    private static final String[] BINARIES = new String[] {"snapclient", "snapserver", "librespot"};
     private boolean clientBound;
     private MenuItem miClientStartStop;
     private boolean serverBound;
@@ -188,8 +190,11 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             }
         }).start();
 
-        final AdView mAdView = (AdView) findViewById(R.id.adView);
+        final RelativeLayout adContainer = (RelativeLayout) findViewById(R.id.adView);
+        AdView mAdView = new AdView(this);
+        mAdView.setAdSize(AdSize.BANNER);
         mAdView.setAdUnitId(AdDetails.AD_UNIT_ID);
+        adContainer.addView(mAdView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
