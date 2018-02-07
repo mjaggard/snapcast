@@ -1,7 +1,5 @@
 apply plugin: 'com.android.application'
 
-def versionPropsFile = file('version.properties')
-
 android {
     signingConfigs {
         config {
@@ -13,6 +11,7 @@ android {
     }
     compileSdkVersion 25
 
+    def versionPropsFile = file('version.properties')
     if (versionPropsFile.canRead()) {
         def Properties versionProps = new Properties()
 
@@ -72,6 +71,8 @@ def increaseVersionCode() {
     gradle.taskGraph.whenReady { taskGraph ->
         if (taskGraph.hasTask(assembleRelease)) {
             /* when run release task */
+            def versionPropsFile = file('version.properties')
+
             if (versionPropsFile.canRead()) {
                 def Properties versionProps = new Properties()
 

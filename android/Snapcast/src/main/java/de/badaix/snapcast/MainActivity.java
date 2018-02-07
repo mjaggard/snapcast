@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -192,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
         final RelativeLayout adContainer = (RelativeLayout) findViewById(R.id.adView);
         AdView mAdView = new AdView(this);
-        mAdView.setAdSize(AdSize.BANNER);
+        mAdView.setAdSize(AdSize.LARGE_BANNER);
         mAdView.setAdUnitId(AdDetails.AD_UNIT_ID);
         adContainer.addView(mAdView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -225,14 +226,15 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_snapcast, menu);
         miClientStartStop = menu.findItem(R.id.action_play_stop);
-        miServerStartStop = menu.findItem(R.id.action_server_stop);
+        miServerStartStop = menu.findItem(R.id.action_server_start_stop);
+        miServerStartStop.getIcon().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
         miSettings = menu.findItem(R.id.action_settings);
 //        miRefresh = menu.findItem(R.id.action_refresh);
         updateStartStopMenuItem();
         boolean isChecked = Settings.getInstance(this).getBoolean("hide_offline", false);
         MenuItem menuItem = menu.findItem(R.id.action_hide_offline);
         menuItem.setChecked(isChecked);
-//        setHost(host, port, controlPort);
+
         if (remoteControl != null) {
             updateMenuItems(remoteControl.isConnected());
         }
@@ -274,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 startSnapclient();
             }
             return true;
-        } else if (id == R.id.action_server_stop) {
+        } else if (id == R.id.action_server_start_stop) {
             if (serverBound && snapServerService.isRunning()) {
                 stopSnapServer();
             } else {
@@ -330,9 +332,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     private void startSnapServer() {
-        if (TextUtils.isEmpty(host))
-            return;
-
         Intent i = new Intent(this, SnapServerService.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.setAction(SnapService.ACTION_START);

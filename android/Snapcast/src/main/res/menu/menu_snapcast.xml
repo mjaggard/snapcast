@@ -10,11 +10,11 @@
         android:visible="false"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/action_server_stop"
+        android:id="@+id/action_server_start_stop"
         android:icon="@android:drawable/ic_media_play"
         android:orderInCategory="100"
         android:title="@string/action_server_stop"
-        android:visible="false"
+        android:visible="true"
         app:showAsAction="always"/>
     <!--    <item
             android:id="@+id/action_settings"

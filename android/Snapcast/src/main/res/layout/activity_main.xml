@@ -46,13 +46,26 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <fragment
-        android:id="@+id/groupListFragment"
-        android:name="de.badaix.snapcast.GroupListFragment"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        tools:layout="@layout/fragment_group_list"/>
+        android:layout_marginBottom="100dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <fragment
+                android:id="@+id/groupListFragment"
+                android:name="de.badaix.snapcast.GroupListFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="?attr/actionBarSize"
+                tools:layout="@layout/fragment_group_list" />
+        </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/btnConnect"
@@ -64,10 +77,10 @@
     <RelativeLayout
         android:id="@+id/adView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
+        android:layout_height="100dp"
         android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom|center"/>
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom|center" />
 
 </android.support.design.widget.CoordinatorLayout>
 
