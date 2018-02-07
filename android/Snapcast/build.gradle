@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+def versionPropsFile = file('version.properties')
+
 android {
     signingConfigs {
         config {
@@ -10,15 +12,33 @@ android {
         }
     }
     compileSdkVersion 25
-    defaultConfig {
-        applicationId 'uk.org.jaggard.snapcast'
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 1203
-        versionName "0.12.02"
-        multiDexEnabled true
-        signingConfig signingConfigs.config
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def name = versionProps['VERSION_NAME']
+        def buildNumber = versionProps['VERSION_NAME']
+        name += "." + buildNumber
+        def code = versionProps['VERSION_CODE'].toInteger()
+
+        defaultConfig {
+            applicationId 'uk.org.jaggard.snapcast'
+            versionName name
+            versionCode code
+            minSdkVersion 15
+            targetSdkVersion 25
+            multiDexEnabled true
+            signingConfig signingConfigs.config
+        }
     }
+    else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
+    increaseVersionCode()
+
     buildTypes {
         release {
             minifyEnabled false
@@ -46,4 +66,26 @@ dependencies {
     //    compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.android.support:design:25.3.1'
     compile 'com.google.android.gms:play-services-ads:11.8.0'
+}
+
+def increaseVersionCode() {
+    gradle.taskGraph.whenReady { taskGraph ->
+        if (taskGraph.hasTask(assembleRelease)) {
+            /* when run release task */
+            if (versionPropsFile.canRead()) {
+                def Properties versionProps = new Properties()
+
+                versionProps.load(new FileInputStream(versionPropsFile))
+
+                def build = versionProps['VERSION_BUILD'].toInteger() + 1
+                def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+                versionProps['VERSION_BUILD'] = build.toString()
+                versionProps['VERSION_CODE'] = code.toString()
+                versionProps.store(versionPropsFile.newWriter(), null)
+            } else {
+                throw new GradleException("Could not read version.properties!")
+            }
+        }
+    }
 }
