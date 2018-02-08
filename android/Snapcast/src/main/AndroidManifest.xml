@@ -32,6 +32,8 @@
         </receiver>
 
         <service android:name=".SnapClientService"/>
+        <service android:name=".SnapServerService"/>
+
 
         <!-- android:theme="@style/Theme.AppCompat.Light.DialogWhenLarge" -->
         <activity

@@ -102,6 +102,27 @@ public abstract class SnapService extends Service {
             startForeground(123, notification);
 
             start(intent);
+
+
+            Thread reader = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    BufferedReader bufferedReader = new BufferedReader(
+                            new InputStreamReader(process.getInputStream()));
+                    String line;
+                    try {
+                        while ((line = bufferedReader.readLine()) != null) {
+                            logFromNative(line);
+                        }
+                        process.waitFor();
+                        stop();
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            logReceived = false;
+            reader.start();
             return START_STICKY;
         }
         return START_NOT_STICKY;

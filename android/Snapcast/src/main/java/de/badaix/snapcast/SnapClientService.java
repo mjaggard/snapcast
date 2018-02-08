@@ -82,33 +82,6 @@ public class SnapClientService extends SnapService {
                     .command(binary.getAbsolutePath(), "-h", host, "-p", Integer.toString(port))
                     .redirectErrorStream(true)
                     .start();
-
-            Thread reader = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    BufferedReader bufferedReader = new BufferedReader(
-                            new InputStreamReader(process.getInputStream()));
-                    String line;
-                    try {
-                        while ((line = bufferedReader.readLine()) != null) {
-                            logFromNative(line);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            logReceived = false;
-            reader.start();
-
-            //TODO: wait for started message on stdout
-/*            long now = System.currentTimeMillis();
-            while (!logReceived) {
-                if (System.currentTimeMillis() > now + 1000)
-                    throw new Exception("start timeout");
-                Thread.sleep(100, 0);
-            }
-*/
         } catch (Exception e) {
             e.printStackTrace();
             if (logListener != null)

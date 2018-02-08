@@ -409,6 +409,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
         Intent intent = new Intent(this, SnapClientService.class);
         bindService(intent, clientConnection, Context.BIND_AUTO_CREATE);
+
+        Intent serverIntent = new Intent(this, SnapServerService.class);
+        bindService(serverIntent, serverConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -585,7 +588,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             }
         });
     }
-
 
     @Override
     public void onResolved(NsdHelper nsdHelper, NsdServiceInfo serviceInfo) {

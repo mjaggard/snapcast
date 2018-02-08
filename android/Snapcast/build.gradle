@@ -26,7 +26,7 @@ android {
             applicationId 'uk.org.jaggard.snapcast'
             versionName name
             versionCode code
-            minSdkVersion 15
+            minSdkVersion 16
             targetSdkVersion 25
             multiDexEnabled true
             signingConfig signingConfigs.config
@@ -69,7 +69,7 @@ dependencies {
 
 def increaseVersionCode() {
     gradle.taskGraph.whenReady { taskGraph ->
-        if (taskGraph.hasTask(assembleRelease)) {
+        if (taskGraph.hasTask("assembleRelease")) {
             /* when run release task */
             def versionPropsFile = file('version.properties')
 
