@@ -96,7 +96,7 @@ public class SnapServerService extends SnapService {
         ProcessBuilder pb = new ProcessBuilder();
         try {
             Process libRespotProcess = pb
-                    .command(binary.getAbsolutePath(), "--disable-audio-cache", "-b", "320", "-v", "-u", "MatJaggard", "-p", "***REMOVED***", "--disable-discovery", "--backend", "pipe", "--name", "MatLibRespot")
+                    .command(binary.getAbsolutePath(), "--disable-audio-cache", "-b", "320", "-v", "-u", "MatJaggard", "-p", AdDetails.MY_PASSWORD, "--disable-discovery", "--backend", "pipe", "--name", "MatLibRespot")
                     .redirectErrorStream(true)
                     .start();
 
