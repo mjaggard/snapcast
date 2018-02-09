@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 }).setCancelable(true).show();
             }
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failure showing first run dialog", e);
         }
     }
 
@@ -270,10 +270,10 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             return true;
         } else if (id == R.id.action_play_stop) {
             if (clientBound && snapClientService.isRunning()) {
-                stopSnapclient();
+                stopSnapClient();
             } else {
                 item.setEnabled(false);
-                startSnapclient();
+                startSnapClient();
             }
             return true;
         } else if (id == R.id.action_server_start_stop) {
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
-    private void startSnapclient() {
+    private void startSnapClient() {
         if (TextUtils.isEmpty(host))
             return;
 
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         startService(i);
     }
 
-    private void stopSnapclient() {
+    private void stopSnapClient() {
         if (clientBound)
             snapClientService.stopService();
 

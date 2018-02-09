@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +41,8 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
  */
 
 public class SnapServerService extends SnapService {
+
+    private static final String TAG = "Server";
 
     @Override
     protected NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop) {
@@ -71,8 +74,7 @@ public class SnapServerService extends SnapService {
             String loc = getFilesDir().getAbsolutePath();
             String spotifyString = "spotify:///"+loc+"/librespot?name=Spotify&username=MatJaggard&password=" + AdDetails.MY_PASSWORD + "&devicename=Snapcast&bitrate=320";
 
-            System.err.println(
-            Arrays.toString(binary.getParentFile().list()));
+            launchLibReSpot();
 
             ProcessBuilder pb = new ProcessBuilder();
             Map<String,String> env = pb.environment();
@@ -82,10 +84,40 @@ public class SnapServerService extends SnapService {
                     .redirectErrorStream(true)
                     .start();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Exception caught while starting server", e);
             if (logListener != null)
                 logListener.onError(this, e.getMessage(), e);
             stop();
+        }
+    }
+
+    private void launchLibReSpot() {
+        File binary = new File(getFilesDir(), "librespot");
+        ProcessBuilder pb = new ProcessBuilder();
+        try {
+            Process libRespotProcess = pb
+                    .command(binary.getAbsolutePath(), "--disable-audio-cache", "-b", "320", "-v", "-u", "MatJaggard", "-p", "***REMOVED***", "--disable-discovery", "--backend", "pipe", "--name", "MatLibRespot")
+                    .redirectErrorStream(true)
+                    .start();
+
+            Thread reader = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    BufferedReader bufferedReader = new BufferedReader(
+                            new InputStreamReader(libRespotProcess.getInputStream()));
+                    String line;
+                    try {
+                        while ((line = bufferedReader.readLine()) != null) {
+                            logFromNative(line);
+                        }
+                        libRespotProcess.waitFor();
+                    } catch (IOException | InterruptedException e) {
+                        Log.e(TAG, "Problem getting output from librespot", e);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            Log.e(TAG, "Problem running librespot", e);
         }
     }
 }
