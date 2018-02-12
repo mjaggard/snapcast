@@ -34,3 +34,6 @@ server/snapserver
 GPATH
 GRTAGS
 GTAGS
+
+# Resolved merge conflicts
+*.orig
