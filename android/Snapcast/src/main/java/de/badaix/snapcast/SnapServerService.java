@@ -74,7 +74,7 @@ public class SnapServerService extends SnapService {
             String loc = getFilesDir().getAbsolutePath();
             String spotifyString = "spotify:///"+loc+"/librespot?name=Spotify&username=MatJaggard&password=" + AdDetails.MY_PASSWORD + "&devicename=Snapcast&bitrate=320";
 
-            launchLibReSpot();
+            // launchLibReSpot();
 
             ProcessBuilder pb = new ProcessBuilder();
             Map<String,String> env = pb.environment();
