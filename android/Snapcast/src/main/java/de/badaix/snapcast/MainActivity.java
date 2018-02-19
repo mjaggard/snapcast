@@ -83,10 +83,11 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private boolean serverBound;
     private MenuItem miServerStartStop;
     private MenuItem miSettings;
-    //    private MenuItem miRefresh;
     private String host = "";
     private int port = 1704;
     private int controlPort = 1705;
+    private String spotifyUsername = "";
+    private String spotifyPassword = "";
     private RemoteControl remoteControl;
     private ServerStatus serverStatus;
     private SnapClientService snapClientService;
@@ -268,6 +269,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             serverDialogFragment.show(getSupportFragmentManager(), "serverDialogFragment");
 //            NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
             return true;
+        } else if (id == R.id.action_local_server_settings) {
+            LocalServerSettingsDialogFragment serverDialogFragment = new LocalServerSettingsDialogFragment();
+            serverDialogFragment.setSpotifyCredentials(spotifyUsername, spotifyPassword);
+            serverDialogFragment.setSpotifyCredentialsListener((username, password) -> setSpotifyCredentials(username, password));
+            serverDialogFragment.show(getSupportFragmentManager(), "localServerDialogFragment");
+            return true;
         } else if (id == R.id.action_play_stop) {
             if (clientBound && snapClientService.isRunning()) {
                 stopSnapClient();
@@ -298,6 +305,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setSpotifyCredentials(String username, String password) {
+        this.spotifyUsername = username;
+        this.spotifyPassword = password;
+        Settings.getInstance(this).setSpotifyCredentials(username, password);
     }
 
     private void updateStartStopMenuItem() {
@@ -335,6 +348,8 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         Intent i = new Intent(this, SnapServerService.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.setAction(SnapService.ACTION_START);
+        i.putExtra(SnapServerService.SPOTIFY_USERNAME, spotifyUsername);
+        i.putExtra(SnapServerService.SPOTIFY_PASSWORD, spotifyPassword);
 
         addBackgroundProcess();
         startService(i);
@@ -407,11 +422,17 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         else
             setHost(Settings.getInstance(this).getHost(), Settings.getInstance(this).getStreamPort(), Settings.getInstance(this).getControlPort());
 
+        setSpotifyCredentialsFromSettings();
+
         Intent intent = new Intent(this, SnapClientService.class);
         bindService(intent, clientConnection, Context.BIND_AUTO_CREATE);
 
         Intent serverIntent = new Intent(this, SnapServerService.class);
         bindService(serverIntent, serverConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void setSpotifyCredentialsFromSettings() {
+        setSpotifyCredentials(Settings.getInstance(this).getSpotifyUsername(), Settings.getInstance(this).getSpotifyPassword());
     }
 
     @Override

@@ -33,7 +33,7 @@ android {
         }
     }
     else {
-        throw new GradleException("Could not read version.properties!")
+        throw new RuntimeException("Could not read version.properties!")
     }
 
     increaseVersionCode()
@@ -85,7 +85,7 @@ def increaseVersionCode() {
                 versionProps['VERSION_CODE'] = code.toString()
                 versionProps.store(versionPropsFile.newWriter(), null)
             } else {
-                throw new GradleException("Could not read version.properties!")
+                throw new RuntimeException("Could not read version.properties!")
             }
         }
     }

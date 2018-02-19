@@ -44,6 +44,8 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
  */
 
 public class SnapClientService extends SnapService {
+    public static final String EXTRA_HOST = "EXTRA_HOST";
+    public static final String EXTRA_PORT = "EXTRA_PORT";
 
     @Override
     protected NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop) {

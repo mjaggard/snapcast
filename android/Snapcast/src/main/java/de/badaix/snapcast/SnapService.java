@@ -43,8 +43,6 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
  */
 
 public abstract class SnapService extends Service {
-    public static final String EXTRA_HOST = "EXTRA_HOST";
-    public static final String EXTRA_PORT = "EXTRA_PORT";
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_STOP = "ACTION_STOP";
     private final IBinder mBinder = new LocalBinder();

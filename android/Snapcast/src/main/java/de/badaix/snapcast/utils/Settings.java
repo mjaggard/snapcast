@@ -132,4 +132,17 @@ public class Settings {
         put("streamPort", streamPort);
         put("controlPort", controlPort);
     }
+
+    public String getSpotifyUsername() {
+        return getString("spotifyUsername", "");
+    }
+
+    public String getSpotifyPassword() {
+        return getString("spotifyPassword", "");
+    }
+
+    public void setSpotifyCredentials(String username, String password) {
+        put("spotifyUsername", username);
+        put("spotifyPassword", password);
+    }
 }

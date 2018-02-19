@@ -41,8 +41,9 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
  */
 
 public class SnapServerService extends SnapService {
-
     private static final String TAG = "Server";
+    public static final String SPOTIFY_USERNAME = "SPOTIFY_USERNAME";
+    public static final String SPOTIFY_PASSWORD = "snapcast";
 
     @Override
     protected NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop) {
@@ -72,9 +73,13 @@ public class SnapServerService extends SnapService {
             wifiWakeLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "SnapcastWifiWakeLock");
             wifiWakeLock.acquire();
             String loc = getFilesDir().getAbsolutePath();
-            String spotifyString = "spotify:///"+loc+"/librespot?name=Spotify&username=MatJaggard&password=" + AdDetails.MY_PASSWORD + "&devicename=Snapcast&bitrate=320";
 
-            // launchLibReSpot();
+            String spotifyUsername = intent.getStringExtra(SPOTIFY_USERNAME);
+            String spotifyPassword = intent.getStringExtra(SPOTIFY_PASSWORD);
+
+            String spotifyString = "spotify:///" + loc + "/librespot?name=Spotify&username=" + spotifyUsername + "&password=" + spotifyPassword + "&devicename=Snapcast&bitrate=320";
+
+            launchLibReSpot(intent);
 
             ProcessBuilder pb = new ProcessBuilder();
             Map<String,String> env = pb.environment();
@@ -91,14 +96,17 @@ public class SnapServerService extends SnapService {
         }
     }
 
-    private void launchLibReSpot() {
+    private void launchLibReSpot(Intent intent) {
         File cacheDir = new File(getCacheDir(), "librespot");
         cacheDir.mkdirs();
         File binary = new File(getFilesDir(), "librespot");
         ProcessBuilder pb = new ProcessBuilder();
         try {
+            String spotifyUsername = intent.getStringExtra(SPOTIFY_USERNAME);
+            String spotifyPassword = intent.getStringExtra(SPOTIFY_PASSWORD);
+
             Process libRespotProcess = pb
-                    .command(binary.getAbsolutePath(), "--cache", cacheDir.getAbsolutePath(), "-b", "320", "-v", "-u", "MatJaggard", "-p", AdDetails.MY_PASSWORD, "--disable-discovery", "--backend", "pipe", "--name", "MatLibRespot")
+                    .command(binary.getAbsolutePath(), "--cache", cacheDir.getAbsolutePath(), "-b", "320", "-v", "-u", spotifyUsername, "-p", spotifyPassword, "--backend", "pipe", "--name", "MatLibRespot")
                     .redirectErrorStream(true)
                     .start();
 
