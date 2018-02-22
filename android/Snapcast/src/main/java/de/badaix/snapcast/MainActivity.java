@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             if (clientBound && snapClientService.isRunning()) {
                 stopSnapClient();
             } else {
-                item.setEnabled(false);
+                item.setEnabled(false); //While starting
                 startSnapClient();
             }
             return true;
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             if (serverBound && snapServerService.isRunning()) {
                 stopSnapServer();
             } else {
-                item.setEnabled(false);
+                item.setEnabled(false); //While starting
                 startSnapServer();
             }
             return true;
@@ -325,21 +325,18 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                     Log.d(TAG, "updateStartStopMenuItem: ic_media_play");
                     miClientStartStop.setIcon(R.drawable.ic_media_play);
                 }
-                if (miClientStartStop != null) {
-                    miClientStartStop.setEnabled(true);
-                }
+                miClientStartStop.setEnabled(true);
 
                 if (serverBound && snapServerService.isRunning()) {
                     Log.d(TAG, "updateStartStopMenuItem: server ic_media_stop");
                     miServerStartStop.setIcon(R.drawable.ic_media_stop);
+                    miServerStartStop.setTitle(R.string.action_server_stop);
                 } else {
                     Log.d(TAG, "updateStartStopMenuItem: server ic_media_play");
                     miServerStartStop.setIcon(R.drawable.ic_media_play);
+                    miServerStartStop.setTitle(R.string.action_server_start);
                 }
-                if (miServerStartStop != null) {
-                    miServerStartStop.setEnabled(true);
-                }
-
+                miServerStartStop.setEnabled(true);
             }
         });
     }
