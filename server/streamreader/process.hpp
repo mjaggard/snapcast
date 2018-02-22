@@ -206,10 +206,20 @@ private:
 					path_escaped.replace(pos, 1, "'\\''");
 					pos += 4;
 				}
+#ifdef __ANDROID__
+				execl("/system/bin/sh", "sh", "-c", ("cd '" + path_escaped + "' && " + command).c_str(), NULL);
+#else
 				execl("/bin/sh", "sh", "-c", ("cd '" + path_escaped + "' && " + command).c_str(), NULL);
+#endif
 			}
 			else
+			{
+#ifdef __ANDROID__
+				execl("/system/bin/sh", "sh", "-c", command.c_str(), NULL);
+#else
 				execl("/bin/sh", "sh", "-c", command.c_str(), NULL);
+#endif
+			}
 			
 			_exit(EXIT_FAILURE);
 		}
