@@ -101,9 +101,7 @@ void PipeStream::worker()
 						if (!sleep(100))
 							break;
 					}
-					else if (count == 0)
-						throw SnapException("end of file");
-					else 
+					else if (count != 0)
 					{
 						len += count;
 						idleBytes = 0;
