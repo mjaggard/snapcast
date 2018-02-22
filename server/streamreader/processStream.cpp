@@ -184,9 +184,7 @@ void ProcessStream::worker()
 						if (!sleep(100))
 							break;
 					}
-					else if (count == 0)
-						throw SnapException("end of file");
-					else 
+					else if (count != 0)
 					{
 						len += count;
 						idleBytes = 0;
@@ -225,7 +223,7 @@ void ProcessStream::worker()
 		{
 			if (lastException != e.what())
 			{
-				LOG(ERROR) << "(PipeStream) Exception: " << e.what() << std::endl;
+				LOG(ERROR) << "(ProcessStream) Exception: " << e.what() << std::endl;
 				lastException = e.what();
 			}
 			process_->kill();
