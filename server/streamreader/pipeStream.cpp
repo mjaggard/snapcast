@@ -113,6 +113,8 @@ void PipeStream::worker()
 
 				if (!active_) break;
 
+				LOG(DEBUG) << chunk.get();
+
 				encoder_->encode(chunk.get());
 
 				if (!active_) break;
