@@ -81,7 +81,7 @@ public class SnapServerService extends SnapService {
             cacheDir.mkdirs();
             String spotifyString = "spotify:///" + loc + "/librespot?name=Spotify&username=" + spotifyUsername + "&password=" + spotifyPassword + "&devicename=Snapcast&bitrate=320&cache=" + cacheDir.getAbsolutePath();
 
-            launchLibReSpot(intent);
+            //launchLibReSpot(intent);
 
             ProcessBuilder pb = new ProcessBuilder();
             Map<String,String> env = pb.environment();
