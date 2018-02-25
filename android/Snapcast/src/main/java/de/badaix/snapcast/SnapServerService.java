@@ -29,10 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Map;
-
-import uk.org.jaggard.snapcast.AdDetails;
 
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 
@@ -85,7 +82,7 @@ public class SnapServerService extends SnapService {
 
             ProcessBuilder pb = new ProcessBuilder();
             Map<String,String> env = pb.environment();
-            env.put("HOME", binary.getParentFile().getAbsolutePath());
+            env.put("HOME", cacheDir.getAbsolutePath());
             env.put("TMPDIR", cacheDir.getAbsolutePath());
             process = pb
                     .command(binary.getAbsolutePath(), "-s", spotifyString)

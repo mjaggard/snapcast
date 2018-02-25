@@ -159,7 +159,11 @@ public abstract class SnapService extends Service {
             int idxBracketOpen = msg.indexOf('[');
             int idxBracketClose = msg.indexOf(']', idxBracketOpen);
             if ((idxBracketOpen > 0) && (idxBracketClose > 0)) {
-                logListener.onLog(SnapService.this, msg.substring(0, idxBracketOpen - 1), msg.substring(idxBracketOpen + 1, idxBracketClose), msg.substring(idxBracketClose + 2));
+                try {
+                    logListener.onLog(SnapService.this, msg.substring(0, idxBracketOpen - 1), msg.substring(idxBracketOpen + 1, idxBracketClose), msg.substring(idxBracketClose + 2));
+                } catch (StringIndexOutOfBoundsException sioobe) {
+                    logListener.onLog(SnapService.this,"", "", msg);
+                }
             }
         }
     }
