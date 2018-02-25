@@ -77,13 +77,16 @@ public class SnapServerService extends SnapService {
             String spotifyUsername = intent.getStringExtra(SPOTIFY_USERNAME);
             String spotifyPassword = intent.getStringExtra(SPOTIFY_PASSWORD);
 
-            String spotifyString = "spotify:///" + loc + "/librespot?name=Spotify&username=" + spotifyUsername + "&password=" + spotifyPassword + "&devicename=Snapcast&bitrate=320";
+            File cacheDir = new File(getCacheDir(), "librespot");
+            cacheDir.mkdirs();
+            String spotifyString = "spotify:///" + loc + "/librespot?name=Spotify&username=" + spotifyUsername + "&password=" + spotifyPassword + "&devicename=Snapcast&bitrate=320&cache=" + cacheDir.getAbsolutePath();
 
             launchLibReSpot(intent);
 
             ProcessBuilder pb = new ProcessBuilder();
             Map<String,String> env = pb.environment();
             env.put("HOME", binary.getParentFile().getAbsolutePath());
+            env.put("TMPDIR", cacheDir.getAbsolutePath());
             process = pb
                     .command(binary.getAbsolutePath(), "-s", spotifyString)
                     .redirectErrorStream(true)
@@ -132,4 +135,3 @@ public class SnapServerService extends SnapService {
         }
     }
 }
-
