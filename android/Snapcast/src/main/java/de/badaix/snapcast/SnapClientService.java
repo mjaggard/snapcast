@@ -76,7 +76,7 @@ public class SnapClientService extends SnapService {
             //https://code.google.com/p/android/issues/detail?id=22763
             if (running)
                 return;
-            File binary = new File(getFilesDir(), "snapserver");
+            File binary = new File(getFilesDir(), "snapclient");
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
