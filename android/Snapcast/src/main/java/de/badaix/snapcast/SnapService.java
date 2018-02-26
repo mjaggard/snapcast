@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,10 +42,10 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 /**
  * Created by mat on 23/01/18.
  */
-
 public abstract class SnapService extends Service {
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_STOP = "ACTION_STOP";
+    private static final String TAG = "SnapService";
     private final IBinder mBinder = new LocalBinder();
     protected Process process;
     protected PowerManager.WakeLock wakeLock;
@@ -97,7 +98,7 @@ public abstract class SnapService extends Service {
             builder.setContentIntent(resultPendingIntent);
             // mId allows you to update the notification later on.
             final Notification notification = builder.build();
-            startForeground(123, notification);
+            startForeground(getNotificationId(), notification);
 
             start(intent);
 
@@ -115,7 +116,7 @@ public abstract class SnapService extends Service {
                         process.waitFor();
                         stop();
                     } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
+                        Log.wtf(TAG, "Stopping native process", e);
                     }
                 }
             });
@@ -129,6 +130,8 @@ public abstract class SnapService extends Service {
     protected abstract void start(Intent intent);
 
     protected abstract NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop);
+
+    protected abstract int getNotificationId();
 
     @Override
     public void onDestroy() {
@@ -145,7 +148,7 @@ public abstract class SnapService extends Service {
         stopForeground(true);
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.cancel(123);
+        mNotificationManager.cancel(getNotificationId());
     }
 
     protected void logFromNative(String msg) {
@@ -179,7 +182,7 @@ public abstract class SnapService extends Service {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DEFAULT);
             running = false;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Releasing logs and destroying process", e);
         }
         if (stopListener != null)
             stopListener.onStop(this);

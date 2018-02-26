@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +27,8 @@ import org.json.JSONObject;
  * Created by johannes on 02.03.16.
  */
 public class Server implements JsonSerialisable {
+    private static final String TAG = "Server";
+
     private Host host;
     private Snapserver snapserver;
 
@@ -49,7 +53,7 @@ public class Server implements JsonSerialisable {
                 snapserver.version = json.getString("version");
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -60,7 +64,7 @@ public class Server implements JsonSerialisable {
             json.put("host", host.toJson());
             json.put("snapserver", snapserver.toJson());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

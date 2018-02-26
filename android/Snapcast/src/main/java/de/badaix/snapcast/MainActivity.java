@@ -344,9 +344,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private void startSnapServer() {
         Intent i = new Intent(this, SnapServerService.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        i.setAction(SnapService.ACTION_START);
         i.putExtra(SnapServerService.SPOTIFY_USERNAME, spotifyUsername);
         i.putExtra(SnapServerService.SPOTIFY_PASSWORD, spotifyPassword);
+        i.setAction(SnapService.ACTION_START);
 
         addBackgroundProcess();
         startService(i);
@@ -528,7 +528,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             try {
                 client = new Client(new JSONObject(data.getStringExtra("client")));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.wtf(TAG, "Creating new client", e);
                 return;
             }
 
@@ -536,7 +536,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             try {
                 clientOriginal = new Client(new JSONObject(data.getStringExtra("clientOriginal")));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.wtf(TAG, "Creating new original client", e);
                 return;
             }
             Log.d(TAG, "new name: " + client.getConfig().getName() + ", old name: " + clientOriginal.getConfig().getName());

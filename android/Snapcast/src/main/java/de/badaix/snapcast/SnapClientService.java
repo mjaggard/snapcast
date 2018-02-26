@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,6 +47,7 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 public class SnapClientService extends SnapService {
     public static final String EXTRA_HOST = "EXTRA_HOST";
     public static final String EXTRA_PORT = "EXTRA_PORT";
+    private static final String TAG = "SnapClientService";
 
     @Override
     protected NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop) {
@@ -58,6 +60,11 @@ public class SnapClientService extends SnapService {
                 .setContentInfo(host)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(getText(R.string.notification_text)))
                 .addAction(R.drawable.ic_media_stop, getString(R.string.stop), piStop);
+    }
+
+    @Override
+    protected int getNotificationId() {
+        return 102;
     }
 
     @Override
@@ -85,7 +92,7 @@ public class SnapClientService extends SnapService {
                     .redirectErrorStream(true)
                     .start();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Starting native process", e);
             if (logListener != null)
                 logListener.onError(this, e.getMessage(), e);
             stop();

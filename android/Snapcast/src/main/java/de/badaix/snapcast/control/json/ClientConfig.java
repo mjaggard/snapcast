@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,9 +27,11 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class ClientConfig implements JsonSerialisable {
+    private static final String TAG = "ClientConfig";
+
     String name = "";
     Volume volume;
-    int latency = 0;
+    int latency;
     int instance = 1;
 
     public ClientConfig() {
@@ -46,7 +50,7 @@ public class ClientConfig implements JsonSerialisable {
             latency = json.getInt("latency");
             instance = json.getInt("instance");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -59,7 +63,7 @@ public class ClientConfig implements JsonSerialisable {
             json.put("latency", latency);
             json.put("instance", instance);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

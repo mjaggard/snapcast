@@ -89,7 +89,7 @@ public class TcpClient {
         try {
             readerThread.join(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Joining reader thread", e);
         }
 
         mBufferIn = null;
@@ -129,7 +129,7 @@ public class TcpClient {
                         mBufferOut.flush();
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.wtf(TAG, "Running writer", e);
                 }
             }
         }
@@ -208,7 +208,7 @@ public class TcpClient {
                         writerThread.interrupt();
                         writerThread.join(100);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.wtf(TAG, "Joining writer thread", e);
                     }
                 }
                 if (socket != null) {

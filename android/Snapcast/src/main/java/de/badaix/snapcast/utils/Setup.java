@@ -52,7 +52,7 @@ public class Setup {
                 return line;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "", e);
         }
 
         return def;

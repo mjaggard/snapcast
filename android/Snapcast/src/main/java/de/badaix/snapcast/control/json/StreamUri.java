@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,12 +30,14 @@ import java.util.Map;
  * Created by johannes on 06.01.16.
  */
 public class StreamUri implements JsonSerialisable {
+    private static final String TAG = "StreamUri";
+
     private String raw;
     private String scheme;
     private String host;
     private String path;
     private String fragment;
-    private HashMap<String, String> query;
+    private Map<String, String> query;
 
     public StreamUri(JSONObject json) {
         fromJson(json);
@@ -55,7 +59,7 @@ public class StreamUri implements JsonSerialisable {
             for (int i = 0; i < jQuery.names().length(); i++)
                 query.put(jQuery.names().getString(i), jQuery.getString(jQuery.names().getString(i)));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -73,7 +77,7 @@ public class StreamUri implements JsonSerialisable {
                 jQuery.put(entry.getKey(), entry.getValue());
             json.put("query", jQuery);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }
@@ -145,7 +149,7 @@ public class StreamUri implements JsonSerialisable {
         this.fragment = fragment;
     }
 
-    public HashMap<String, String> getQuery() {
+    public Map<String, String> getQuery() {
         return query;
     }
 

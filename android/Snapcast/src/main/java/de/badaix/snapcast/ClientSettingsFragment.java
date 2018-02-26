@@ -24,6 +24,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,8 +35,10 @@ import de.badaix.snapcast.control.json.Client;
  * Created by johannes on 11.01.16.
  */
 public class ClientSettingsFragment extends PreferenceFragment {
-    private Client client = null;
-    private Client clientOriginal = null;
+    private static final String TAG = "ClientSettingsFragment";
+
+    private Client client;
+    private Client clientOriginal;
     private EditTextPreference prefName;
     private EditTextPreference prefLatency;
     private Preference prefMac;
@@ -55,7 +58,7 @@ public class ClientSettingsFragment extends PreferenceFragment {
         try {
             client = new Client(new JSONObject(bundle.getString("client")));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Creating new client", e);
         }
         clientOriginal = new Client(client.toJson());
 

@@ -20,6 +20,7 @@ package de.badaix.snapcast.control.json;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -34,11 +36,13 @@ import java.util.Collections;
  */
 
 public class Group implements JsonSerialisable, Comparable<Group> {
+    private static final String TAG = "Group";
+
     private String name = "";
     private String id = "";
     private String streamId = "";
-    private boolean muted = false;
-    private ArrayList<Client> clients = new ArrayList<Client>();
+    private boolean muted;
+    private List<Client> clients = new ArrayList<Client>();
 
     public Group(JSONObject json) {
         fromJson(json);
@@ -61,7 +65,7 @@ public class Group implements JsonSerialisable, Comparable<Group> {
                     clients.add(new Client(jClients.getJSONObject(i)));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
         sort();
     }
@@ -76,7 +80,7 @@ public class Group implements JsonSerialisable, Comparable<Group> {
             json.put("muted", muted);
             json.put("clients", getJsonClients());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }
@@ -110,7 +114,7 @@ public class Group implements JsonSerialisable, Comparable<Group> {
         this.streamId = streamId;
     }
 
-    public ArrayList<Client> getClients() {
+    public List<Client> getClients() {
         return clients;
     }
 

@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -39,6 +40,8 @@ import de.badaix.snapcast.utils.NsdHelper;
  * Created by johannes on 21.02.16.
  */
 public class ServerDialogFragment extends DialogFragment implements View.OnClickListener {
+
+    private static final String TAG = "ServerDialogFragment";
 
     private Button btnScan;
     private EditText editHost;
@@ -83,7 +86,7 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
                             streamPort = Integer.parseInt(editStreamPort.getText().toString());
                             controlPort = Integer.parseInt(editControlPort.getText().toString());
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                            Log.wtf(TAG, "Reading port numbers", e);
                         }
                         if (listener != null) {
                             listener.onHostChanged(host, streamPort, controlPort);
@@ -134,12 +137,12 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
                         editControlPort.setText(Integer.toString(controlPort));
                         checkBoxAutoStart.setChecked(autoStart);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.wtf(TAG, "Setting UI to current values, currently on UI thread", e);
                     }
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting UI to current values in a thread", e);
         }
     }
 

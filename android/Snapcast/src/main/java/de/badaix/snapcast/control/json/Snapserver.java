@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +27,8 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Snapserver extends Snapcast {
+    private static final String TAG = "Snapserver";
+
     int controlProtocolVersion = 1;
 
     public Snapserver() {
@@ -41,7 +45,7 @@ public class Snapserver extends Snapcast {
             super.fromJson(json);
             controlProtocolVersion = json.getInt("controlProtocolVersion");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -51,7 +55,7 @@ public class Snapserver extends Snapcast {
         try {
             json.put("controlProtocolVersion", controlProtocolVersion);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

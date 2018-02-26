@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +27,8 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Snapcast implements JsonSerialisable {
+    private static final String TAG = "Snapcast";
+
     String name = "";
     String version = "";
     int protocolVersion = 1;
@@ -43,7 +47,7 @@ public class Snapcast implements JsonSerialisable {
             version = json.getString("version");
             protocolVersion = json.getInt("protocolVersion");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -55,7 +59,7 @@ public class Snapcast implements JsonSerialisable {
             json.put("version", version);
             json.put("protocolVersion", protocolVersion);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

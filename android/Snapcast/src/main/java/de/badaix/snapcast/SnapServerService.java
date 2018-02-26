@@ -54,6 +54,11 @@ public class SnapServerService extends SnapService {
     }
 
     @Override
+    protected int getNotificationId() {
+        return 101;
+    }
+
+    @Override
     protected void start(Intent intent) {
         try {
             //https://code.google.com/p/android/issues/detail?id=22763

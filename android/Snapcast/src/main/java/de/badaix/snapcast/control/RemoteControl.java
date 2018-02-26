@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.badaix.snapcast.control.json.Client;
 import de.badaix.snapcast.control.json.Group;
@@ -107,7 +108,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
                 processJson(json);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Handling received message", e);
         }
     }
 
@@ -191,7 +192,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Processing JSON data", e);
         }
     }
 
@@ -240,7 +241,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             RPCRequest request = jsonRequest("Client.SetName", params);
             tcpClient.sendMessage(request.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting name", e);
         }
     }
 
@@ -252,7 +253,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             RPCRequest request = jsonRequest("Client.SetLatency", params);
             tcpClient.sendMessage(request.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting latency", e);
         }
     }
 
@@ -260,7 +261,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
         setStream(group.getId(), id);
     }
 
-    public void setClients(String groupId, ArrayList<String> clientIds) {
+    public void setClients(String groupId, List<String> clientIds) {
         try {
             JSONArray clients = new JSONArray();
             for (String clientId : clientIds)
@@ -271,7 +272,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             RPCRequest request = jsonRequest("Group.SetClients", params);
             tcpClient.sendMessage(request.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting clients", e);
         }
     }
 
@@ -283,7 +284,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             RPCRequest request = jsonRequest("Group.SetStream", params);
             tcpClient.sendMessage(request.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting stream", e);
         }
     }
 
@@ -295,7 +296,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             RPCRequest request = jsonRequest("Group.SetMute", params);
             tcpClient.sendMessage(request.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting group muted", e);
         }
     }
 
@@ -309,7 +310,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             }
             tcpClient.sendMessage(batch.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting group volume", e);
         }
     }
 
@@ -325,7 +326,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
         try {
             tcpClient.sendMessage(getVolumeRequest(client, percent, mute).toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "", e);
         }
     }
 
@@ -336,7 +337,7 @@ public class RemoteControl implements TcpClient.TcpClientListener {
             RPCRequest request = jsonRequest("Server.DeleteClient", params);
             tcpClient.sendMessage(request.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Sending delete message", e);
         }
     }
 

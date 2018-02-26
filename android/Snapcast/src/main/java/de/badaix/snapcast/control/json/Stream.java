@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +27,8 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Stream implements JsonSerialisable {
+    private static final String TAG = "Stream";
+
     private StreamUri uri;
     private String id;
     private Status status;
@@ -46,7 +50,7 @@ public class Stream implements JsonSerialisable {
                 status = Status.unknown;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
     }
 
@@ -58,7 +62,7 @@ public class Stream implements JsonSerialisable {
             json.put("id", id);
             json.put("status", status);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
         return json;
     }

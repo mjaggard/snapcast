@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,13 +27,15 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Client implements JsonSerialisable, Comparable<Client> {
+    private static final String TAG = "Client";
+
     private Host host;
     private Snapclient snapclient;
     private ClientConfig config;
     private Time_t lastSeen;
     private boolean connected;
     private String clientId;
-    private boolean deleted = false;
+    private boolean deleted;
 
     public Client(JSONObject json) {
         fromJson(json);
@@ -48,7 +52,7 @@ public class Client implements JsonSerialisable, Comparable<Client> {
             connected = json.getBoolean("connected");
             clientId = json.optString("id", host.mac);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -63,7 +67,7 @@ public class Client implements JsonSerialisable, Comparable<Client> {
             json.put("connected", connected);
             json.put("id", clientId);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

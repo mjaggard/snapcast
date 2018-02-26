@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,6 +28,8 @@ import org.json.JSONObject;
  */
 
 class RPCRequest {
+    private static final String TAG = "RPCRequest";
+
     RPCRequest(JSONObject json) throws JSONException {
         fromJson(json);
     }
@@ -55,7 +59,7 @@ class RPCRequest {
                 request.put("params", params);
             return request;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
             return null;
         }
     }
@@ -76,6 +80,8 @@ class RPCRequest {
 
 
 class RPCNotification {
+    private static final String TAG = "RPCNotification";
+
     RPCNotification(JSONObject json) throws JSONException {
         fromJson(json);
     }
@@ -103,7 +109,7 @@ class RPCNotification {
                 request.put("params", params);
             return request;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
             return null;
         }
     }
@@ -122,6 +128,8 @@ class RPCNotification {
 
 
 class RPCResponse {
+    private static final String TAG = "RPCResponse";
+
     RPCResponse(JSONObject json) throws JSONException {
         fromJson(json);
     }
@@ -149,7 +157,7 @@ class RPCResponse {
             response.put("id", id);
             return response;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
             return null;
         }
     }

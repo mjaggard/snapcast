@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +27,8 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Host implements JsonSerialisable {
+    private static final String TAG = "Host";
+
     String name = "";
     String mac = "";
     String os = "";
@@ -48,7 +52,7 @@ public class Host implements JsonSerialisable {
             arch = json.getString("arch");
             ip = json.getString("ip");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -62,7 +66,7 @@ public class Host implements JsonSerialisable {
             json.put("arch", arch);
             json.put("ip", ip);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

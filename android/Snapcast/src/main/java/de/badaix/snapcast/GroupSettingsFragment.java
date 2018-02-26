@@ -25,6 +25,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +33,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import de.badaix.snapcast.control.json.Client;
 import de.badaix.snapcast.control.json.Group;
@@ -44,12 +46,12 @@ import de.badaix.snapcast.control.json.Stream;
 
 public class GroupSettingsFragment extends PreferenceFragment {
 
-    //private static final String TAG = "GroupSettingsFragment";
+    private static final String TAG = "GroupSettingsFragment";
 
     private ListPreference prefStreams;
     private Group group = null;
-    private ServerStatus serverStatus = null;
-    private PreferenceCategory prefCatClients = null;
+    private ServerStatus serverStatus;
+    private PreferenceCategory prefCatClients;
 
     private String oldClients = "";
     private String oldStream = "";
@@ -69,10 +71,10 @@ public class GroupSettingsFragment extends PreferenceFragment {
             group = new Group(new JSONObject(bundle.getString("group")));
             serverStatus = new ServerStatus(new JSONObject(bundle.getString("serverStatus")));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Creating new group and server status", e);
         }
 
-        final ArrayList<Stream> streams = serverStatus.getStreams();
+        final List<Stream> streams = serverStatus.getStreams();
         final CharSequence[] streamNames = new CharSequence[streams.size()];
         final CharSequence[] streamIds = new CharSequence[streams.size()];
         for (int i = 0; i < streams.size(); ++i) {

@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,8 +27,10 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Time_t implements JsonSerialisable {
-    private long sec = 0;
-    private long usec = 0;
+    private static final String TAG = "Time_t";
+
+    private long sec;
+    private long usec;
 
     public Time_t() {
 
@@ -47,7 +51,7 @@ public class Time_t implements JsonSerialisable {
             sec = json.getLong("sec");
             usec = json.getLong("usec");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -58,7 +62,7 @@ public class Time_t implements JsonSerialisable {
             json.put("sec", sec);
             json.put("usec", usec);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

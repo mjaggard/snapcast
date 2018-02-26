@@ -18,6 +18,8 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,7 +27,8 @@ import org.json.JSONObject;
  * Created by johannes on 06.01.16.
  */
 public class Volume implements JsonSerialisable {
-    private boolean muted = false;
+    private static final String TAG = "Volume";
+    private boolean muted;
     private int percent = 100;
 
     public Volume(JSONObject json) {
@@ -47,7 +50,7 @@ public class Volume implements JsonSerialisable {
             percent = json.getInt("percent");
             muted = json.getBoolean("muted");
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Getting from JSON", e);
         }
     }
 
@@ -58,7 +61,7 @@ public class Volume implements JsonSerialisable {
             json.put("percent", percent);
             json.put("muted", muted);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }

@@ -18,20 +18,24 @@
 
 package de.badaix.snapcast.control.json;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by johannes on 06.01.16.
  */
 public class ServerStatus implements JsonSerialisable {
-    private ArrayList<Group> groups = new ArrayList<Group>();
-    private ArrayList<Stream> streams = new ArrayList<Stream>();
-    private Server server = null;
+    private static final String TAG = "ServerStatus";
+    private final List<Group> groups = new ArrayList<Group>();
+    private final List<Stream> streams = new ArrayList<Stream>();
+    private Server server;
 
     public ServerStatus(JSONObject json) {
         fromJson(json);
@@ -52,7 +56,7 @@ public class ServerStatus implements JsonSerialisable {
             for (int i = 0; i < jGroups.length(); i++)
                 groups.add(new Group(jGroups.getJSONObject(i)));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting up from JSON", e);
         }
         sort();
     }
@@ -65,7 +69,7 @@ public class ServerStatus implements JsonSerialisable {
             json.put("groups", getJsonGroups());
             json.put("streams", getJsonStreams());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Saving to JSON", e);
         }
         return json;
     }
@@ -161,11 +165,11 @@ public class ServerStatus implements JsonSerialisable {
         return null;
     }
 
-    public ArrayList<Group> getGroups() {
+    public List<Group> getGroups() {
         return groups;
     }
 
-    public ArrayList<Stream> getStreams() {
+    public List<Stream> getStreams() {
         return streams;
     }
 

@@ -22,9 +22,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.webkit.WebView;
 
 public class AboutActivity extends AppCompatActivity {
+    private static final String TAG = "About";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,13 +35,14 @@ public class AboutActivity extends AppCompatActivity {
         try {
             getSupportActionBar().setTitle(getString(R.string.about) + " Snapcast");
         } catch (Exception e) {
+            Log.wtf(TAG, "Setting title", e);
         }
         PackageInfo pInfo;
         try {
             pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             getSupportActionBar().setSubtitle("v" + pInfo.versionName);
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Setting subtitle", e);
         }
         WebView wv = (WebView) findViewById(R.id.webView);
         wv.loadUrl("file:///android_asset/" + this.getText(R.string.about_file));
