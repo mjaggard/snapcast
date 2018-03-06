@@ -20,6 +20,8 @@ package de.badaix.snapcast;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -152,32 +154,35 @@ public class GroupListFragment extends Fragment {
 
 
         void update() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    clear();
-                    for (Group group : GroupAdapter.this.serverStatus.getGroups()) {
-                        if (group.getClients().isEmpty())
+            Runnable runnable = () -> {
+                clear();
+                for (Group group : GroupAdapter.this.serverStatus.getGroups()) {
+                    if (group.getClients().isEmpty())
+                        continue;
+
+                    int onlineCount = 0;
+                    int count = 0;
+                    for (Client client : group.getClients()) {
+                        if (client == null || client.isDeleted())
                             continue;
-
-                        int onlineCount = 0;
-                        int count = 0;
-                        for (Client client : group.getClients()) {
-                            if (client == null || client.isDeleted())
-                                continue;
-                            if (client.isConnected())// && client.getConfig().getStream().equals(GroupListFragment.this.stream.getId()))
-                                onlineCount++;
-                            count++;
-                        }
-
-                        if ((onlineCount > 0) || (!hideOffline && (count > 0)))
-                            add(group);
+                        if (client.isConnected())// && client.getConfig().getStream().equals(GroupListFragment.this.stream.getId()))
+                            onlineCount++;
+                        count++;
                     }
 
-                    if (getActivity() != null)
-                        notifyDataSetChanged();
+                    if ((onlineCount > 0) || (!hideOffline && (count > 0)))
+                        add(group);
                 }
-            });
+
+                if (getActivity() != null)
+                    notifyDataSetChanged();
+            };
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(runnable);
+            } else {
+                new Handler(Looper.getMainLooper()).post(runnable);
+            }
         }
 
         void setHideOffline(boolean hideOffline) {

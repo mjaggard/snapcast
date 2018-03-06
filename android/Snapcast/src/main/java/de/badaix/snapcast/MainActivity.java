@@ -167,6 +167,11 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 //            tvInfo.setText("Sample rate: " + rate + ", buffer size: " + size);
         }
 
+        Toolbar serverToolbar = (Toolbar) findViewById(R.id.server_toolbar);
+        serverToolbar.setTitle(R.string.local_server);
+        serverToolbar.inflateMenu(R.menu.menu_snapcast_server);
+        serverToolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
+
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -181,14 +186,11 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
         setActionbarSubtitle("Host: no Snapserver found");
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (String binaryName : BINARIES) {
-                    Log.d(TAG, "copying " + binaryName);
-                    Setup.copyBinAsset(MainActivity.this, binaryName, binaryName);
-                    Log.d(TAG, "done copying " + binaryName);
-                }
+        new Thread(() -> {
+            for (String binaryName : BINARIES) {
+                Log.d(TAG, "copying " + binaryName);
+                Setup.copyBinAsset(MainActivity.this, binaryName, binaryName);
+                Log.d(TAG, "done copying " + binaryName);
             }
         }).start();
 
@@ -210,12 +212,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             Log.d(TAG, "lastRunVersion: " + lastRunVersion + ", version: " + verCode);
             if (lastRunVersion < verCode) {
                 // Place your dialog code here to display the dialog
-                new AlertDialog.Builder(this).setTitle(R.string.first_run_title).setMessage(R.string.first_run_text).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Settings.getInstance(MainActivity.this).put("lastRunVersion", verCode);
-                    }
-                }).setCancelable(true).show();
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.first_run_title)
+                        .setMessage(R.string.first_run_text)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> Settings.getInstance(MainActivity.this).put("lastRunVersion", verCode))
+                        .setCancelable(true)
+                        .show();
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Failure showing first run dialog", e);
@@ -314,30 +316,27 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     private void updateStartStopMenuItem() {
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        MainActivity.this.runOnUiThread(() -> {
 
-                if (clientBound && snapClientService.isRunning()) {
-                    Log.d(TAG, "updateStartStopMenuItem: ic_media_stop");
-                    miClientStartStop.setIcon(R.drawable.ic_media_stop);
-                } else {
-                    Log.d(TAG, "updateStartStopMenuItem: ic_media_play");
-                    miClientStartStop.setIcon(R.drawable.ic_media_play);
-                }
-                miClientStartStop.setEnabled(true);
-
-                if (serverBound && snapServerService.isRunning()) {
-                    Log.d(TAG, "updateStartStopMenuItem: server ic_media_stop");
-                    miServerStartStop.setIcon(R.drawable.ic_media_stop);
-                    miServerStartStop.setTitle(R.string.action_server_stop);
-                } else {
-                    Log.d(TAG, "updateStartStopMenuItem: server ic_media_play");
-                    miServerStartStop.setIcon(R.drawable.ic_media_play);
-                    miServerStartStop.setTitle(R.string.action_server_start);
-                }
-                miServerStartStop.setEnabled(true);
+            if (clientBound && snapClientService.isRunning()) {
+                Log.d(TAG, "updateStartStopMenuItem: ic_media_stop");
+                miClientStartStop.setIcon(R.drawable.ic_media_stop);
+            } else {
+                Log.d(TAG, "updateStartStopMenuItem: ic_media_play");
+                miClientStartStop.setIcon(R.drawable.ic_media_play);
             }
+            miClientStartStop.setEnabled(true);
+
+            if (serverBound && snapServerService.isRunning()) {
+                Log.d(TAG, "updateStartStopMenuItem: server ic_media_stop");
+                miServerStartStop.setIcon(R.drawable.ic_media_stop);
+                miServerStartStop.setTitle(R.string.action_server_stop);
+            } else {
+                Log.d(TAG, "updateStartStopMenuItem: server ic_media_play");
+                miServerStartStop.setIcon(R.drawable.ic_media_play);
+                miServerStartStop.setTitle(R.string.action_server_start);
+            }
+            miServerStartStop.setEnabled(true);
         });
     }
 
@@ -564,13 +563,10 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
 
     private void setActionbarSubtitle(final String subtitle) {
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null)
-                    actionBar.setSubtitle(subtitle);
-            }
+        MainActivity.this.runOnUiThread(() -> {
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null)
+                actionBar.setSubtitle(subtitle);
         });
     }
 
@@ -585,24 +581,21 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     public void updateMenuItems(final boolean connected) {
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (connected) {
-                    if (miSettings != null)
-                        miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                    if (miClientStartStop != null)
-                        miClientStartStop.setVisible(true);
+        this.runOnUiThread(() -> {
+            if (connected) {
+                if (miSettings != null)
+                    miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                if (miClientStartStop != null)
+                    miClientStartStop.setVisible(true);
 //                    if (miRefresh != null)
 //                        miRefresh.setVisible(true);
-                } else {
-                    if (miSettings != null)
-                        miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                    if (miClientStartStop != null)
-                        miClientStartStop.setVisible(false);
+            } else {
+                if (miSettings != null)
+                    miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                if (miClientStartStop != null)
+                    miClientStartStop.setVisible(false);
 //                    if (miRefresh != null)
 //                        miRefresh.setVisible(false);
-                }
             }
         });
     }
