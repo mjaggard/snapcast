@@ -171,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         serverToolbar.setTitle(R.string.local_server);
         serverToolbar.inflateMenu(R.menu.menu_snapcast_server);
         serverToolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
+        miServerStartStop = serverToolbar.getMenu().findItem(R.id.action_server_start_stop);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -229,8 +230,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_snapcast, menu);
         miClientStartStop = menu.findItem(R.id.action_play_stop);
-        miServerStartStop = menu.findItem(R.id.action_server_start_stop);
-        miServerStartStop.getIcon().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
         miSettings = menu.findItem(R.id.action_settings);
 //        miRefresh = menu.findItem(R.id.action_refresh);
         updateStartStopMenuItem();
