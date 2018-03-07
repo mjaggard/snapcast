@@ -212,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             int lastRunVersion = Settings.getInstance(this).getInt("lastRunVersion", 0);
             Log.d(TAG, "lastRunVersion: " + lastRunVersion + ", version: " + verCode);
             if (lastRunVersion < verCode) {
-                // Place your dialog code here to display the dialog
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.first_run_title)
                         .setMessage(R.string.first_run_text)
@@ -346,8 +345,34 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         i.putExtra(SnapServerService.SPOTIFY_PASSWORD, spotifyPassword);
         i.setAction(SnapService.ACTION_START);
 
+        if (!clientUsingLocalhost()) {
+            if (clientIsEmpty()) {
+                changeClientToLocalhost(null, 0);
+            } else {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.change_client_title)
+                        .setMessage(R.string.change_client_text)
+                        .setPositiveButton(android.R.string.ok, this::changeClientToLocalhost)
+                        .setCancelable(true)
+                        .show();
+            }
+        }
+
         addBackgroundProcess();
         startService(i);
+    }
+
+    private boolean clientUsingLocalhost() {
+        return host != null && host.equals("localhost");
+    }
+
+    private boolean clientIsEmpty() {
+        return TextUtils.isEmpty(host);
+    }
+
+    private void changeClientToLocalhost(DialogInterface ignore1, int ignore2) {
+        setHost("localhost", 1704, 1705);
+        startRemoteControl();
     }
 
     private void addBackgroundProcess() {
@@ -391,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private void startRemoteControl() {
         if (remoteControl == null)
             remoteControl = new RemoteControl(this);
-        if (!host.isEmpty())
+        if (!TextUtils.isEmpty(host))
             remoteControl.connect(host, controlPort);
     }
 
