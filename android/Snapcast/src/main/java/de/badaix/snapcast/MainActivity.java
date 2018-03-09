@@ -55,6 +55,7 @@ import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private static final int GROUP_PROPERTIES_REQUEST = 2;
     private static final String TAG = "Main";
     private static final String SERVICE_NAME = "Snapcast";// #2";
-    private static final String[] BINARIES = new String[] {"snapclient", "snapserver", "librespot"};
+    private static final String[] BINARIES = new String[]{"snapclient", "snapserver", "librespot"};
     private boolean clientBound;
     private MenuItem miClientStartStop;
     private boolean serverBound;
@@ -270,10 +271,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 //            NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
             return true;
         } else if (id == R.id.action_local_server_settings) {
-            LocalServerSettingsDialogFragment serverDialogFragment = new LocalServerSettingsDialogFragment();
-            serverDialogFragment.setSpotifyCredentials(spotifyUsername, spotifyPassword);
-            serverDialogFragment.setSpotifyCredentialsListener((username, password) -> setSpotifyCredentials(username, password));
-            serverDialogFragment.show(getSupportFragmentManager(), "localServerDialogFragment");
+            openLocalServerSettings();
             return true;
         } else if (id == R.id.action_play_stop) {
             if (clientBound && snapClientService.isRunning()) {
@@ -288,7 +286,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 stopSnapServer();
             } else {
                 item.setEnabled(false); //While starting
-                startSnapServer();
+                if (!startSnapServer()) {
+                    item.setEnabled(true); //Enable again as start button if it didn't start.
+                }
             }
             return true;
         } else if (id == R.id.action_hide_offline) {
@@ -305,6 +305,13 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openLocalServerSettings() {
+        LocalServerSettingsDialogFragment serverDialogFragment = new LocalServerSettingsDialogFragment();
+        serverDialogFragment.setSpotifyCredentials(spotifyUsername, spotifyPassword);
+        serverDialogFragment.setSpotifyCredentialsListener((username, password) -> setSpotifyCredentials(username, password));
+        serverDialogFragment.show(getSupportFragmentManager(), "localServerDialogFragment");
     }
 
     private void setSpotifyCredentials(String username, String password) {
@@ -338,12 +345,20 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         });
     }
 
-    private void startSnapServer() {
+    private boolean startSnapServer() {
+        if (TextUtils.isEmpty(spotifyUsername) || TextUtils.isEmpty(spotifyPassword)) {
+            openLocalServerSettings();
+            return false;
+        }
+
         Intent i = new Intent(this, SnapServerService.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(SnapServerService.SPOTIFY_USERNAME, spotifyUsername);
         i.putExtra(SnapServerService.SPOTIFY_PASSWORD, spotifyPassword);
         i.setAction(SnapService.ACTION_START);
+
+        addBackgroundProcess();
+        startService(i);
 
         if (!clientUsingLocalhost()) {
             if (clientIsEmpty()) {
@@ -358,8 +373,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             }
         }
 
-        addBackgroundProcess();
-        startService(i);
+        return true;
     }
 
     private boolean clientUsingLocalhost() {
@@ -372,7 +386,15 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
     private void changeClientToLocalhost(DialogInterface ignore1, int ignore2) {
         setHost("localhost", 1704, 1705);
-        startRemoteControl();
+        new Thread(() -> {
+            //Give the local server a second to start before we try to connect to it.
+            //TODO: Handle this async properly by waiting for the server to start.
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+            }
+            startRemoteControl();
+        }).start();
     }
 
     private void addBackgroundProcess() {
@@ -604,7 +626,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         Settings.getInstance(this).setHost(host, streamPort, controlPort);
     }
 
-    public void updateMenuItems(final boolean connected) {
+    private void updateMenuItems(final boolean connected) {
         this.runOnUiThread(() -> {
             if (connected) {
                 if (miSettings != null)
