@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
     private void changeClientToLocalhost(DialogInterface ignore1, int ignore2) {
         setHost("localhost", 1704, 1705);
-        new Thread(() -> {
+//        new Thread(() -> {
             //Give the local server a second to start before we try to connect to it.
             //TODO: Handle this async properly by waiting for the server to start.
             try {
@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             } catch (InterruptedException ie) {
             }
             startRemoteControl();
-        }).start();
+//        }).start();
     }
 
     private void addBackgroundProcess() {
@@ -547,11 +547,14 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 }
             }
         } else if ("err".equals(logClass) || "Emerg".equals(logClass) || "Alert".equals(logClass) || "Crit".equals(logClass) || "Err".equals(logClass)) {
-            if (warningSamplerateSnackbar != null)
-                warningSamplerateSnackbar.dismiss();
-            warningSamplerateSnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
-                    msg, Snackbar.LENGTH_LONG);
-            warningSamplerateSnackbar.show();
+            if (msg != null && msg.contains("Error reading config: parse error - unexpected end of input")) {
+            } else {
+                if (warningSamplerateSnackbar != null)
+                    warningSamplerateSnackbar.dismiss();
+                warningSamplerateSnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
+                        msg, Snackbar.LENGTH_LONG);
+                warningSamplerateSnackbar.show();
+            }
         }
     }
 
