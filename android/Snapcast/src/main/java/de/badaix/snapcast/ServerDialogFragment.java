@@ -25,6 +25,8 @@ import android.content.DialogInterface;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -124,23 +126,22 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
     }
 
     private void update() {
-        if (this.getActivity() == null)
-            return;
-
         try {
-            this.getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        editHost.setText(host);
-                        editStreamPort.setText(Integer.toString(streamPort));
-                        editControlPort.setText(Integer.toString(controlPort));
-                        checkBoxAutoStart.setChecked(autoStart);
-                    } catch (Exception e) {
-                        Log.wtf(TAG, "Setting UI to current values, currently on UI thread", e);
-                    }
+            Runnable runnable = () -> {
+                try {
+                    editHost.setText(host);
+                    editStreamPort.setText(Integer.toString(streamPort));
+                    editControlPort.setText(Integer.toString(controlPort));
+                    checkBoxAutoStart.setChecked(autoStart);
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Setting UI to current values, currently on UI thread", e);
                 }
-            });
+            };
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(runnable);
+            } else {
+                new Handler(Looper.getMainLooper()).post(runnable);
+            }
         } catch (Exception e) {
             Log.wtf(TAG, "Setting UI to current values in a thread", e);
         }

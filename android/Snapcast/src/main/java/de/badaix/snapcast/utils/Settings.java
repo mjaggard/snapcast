@@ -44,10 +44,6 @@ public class Settings {
         return ctx;
     }
 
-    public Resources getResources() {
-        return ctx.getResources();
-    }
-
     public SharedPreferences getPrefs() {
         return PreferenceManager.getDefaultSharedPreferences(ctx);
     }
@@ -66,23 +62,9 @@ public class Settings {
         return this;
     }
 
-    public Settings put(String key, float value) {
-        SharedPreferences.Editor editor = getPrefs().edit();
-        editor.putFloat(key, value);
-        editor.apply();
-        return this;
-    }
-
     public Settings put(String key, int value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putInt(key, value);
-        editor.apply();
-        return this;
-    }
-
-    public Settings put(String key, long value) {
-        SharedPreferences.Editor editor = getPrefs().edit();
-        editor.putLong(key, value);
         editor.apply();
         return this;
     }
@@ -95,16 +77,8 @@ public class Settings {
         return getPrefs().getBoolean(key, defaultValue);
     }
 
-    public float getFloat(String key, float defaultValue) {
-        return getPrefs().getFloat(key, defaultValue);
-    }
-
     public int getInt(String key, int defaultValue) {
         return getPrefs().getInt(key, defaultValue);
-    }
-
-    public long getLong(String key, long defaultValue) {
-        return getPrefs().getLong(key, defaultValue);
     }
 
     public String getHost() {

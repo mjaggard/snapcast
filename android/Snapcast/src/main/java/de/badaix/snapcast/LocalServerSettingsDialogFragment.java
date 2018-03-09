@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -66,15 +68,12 @@ public class LocalServerSettingsDialogFragment extends DialogFragment {
 
         builder.setView(view)
                 // Add action buttons
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // sign in the user ...
-                        spotifyUsername = editSpotifyUsername.getText().toString();
-                        spotifyPassword = editSpotifyPassword.getText().toString();
-                        if (spotifyCredentialsListener != null) {
-                            spotifyCredentialsListener.onSpotifyCredentialsChanged(spotifyUsername, spotifyPassword);
-                        }
+                .setPositiveButton(android.R.string.ok, (dialog, id) -> {
+                    // sign in the user ...
+                    spotifyUsername = editSpotifyUsername.getText().toString();
+                    spotifyPassword = editSpotifyPassword.getText().toString();
+                    if (spotifyCredentialsListener != null) {
+                        spotifyCredentialsListener.onSpotifyCredentialsChanged(spotifyUsername, spotifyPassword);
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -97,21 +96,20 @@ public class LocalServerSettingsDialogFragment extends DialogFragment {
     }
 
     private void update() {
-        if (this.getActivity() == null)
-            return;
-
         try {
-            this.getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        editSpotifyUsername.setText(spotifyUsername);
-                        editSpotifyPassword.setText(spotifyPassword);
-                    } catch (Exception e) {
-                        Log.wtf(TAG, "Error setting UI details", e);
-                    }
+            Runnable runnable = () -> {
+                try {
+                    editSpotifyUsername.setText(spotifyUsername);
+                    editSpotifyPassword.setText(spotifyPassword);
+                } catch (Exception e) {
+                    Log.wtf(TAG, "Error setting UI details", e);
                 }
-            });
+            };
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(runnable);
+            } else {
+                new Handler(Looper.getMainLooper()).post(runnable);
+            }
         } catch (Exception e) {
             Log.wtf(TAG, "Error setting UI details", e);
         }
