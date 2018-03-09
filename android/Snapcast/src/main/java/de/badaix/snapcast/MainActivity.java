@@ -360,17 +360,16 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         addBackgroundProcess();
         startService(i);
 
-        if (!clientUsingLocalhost()) {
-            if (clientIsEmpty()) {
-                changeClientToLocalhost(null, 0);
-            } else {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.change_client_title)
-                        .setMessage(R.string.change_client_text)
-                        .setPositiveButton(android.R.string.ok, this::changeClientToLocalhost)
-                        .setCancelable(true)
-                        .show();
-            }
+        if (clientUsingLocalhost() || clientIsEmpty()) {
+            //If it is locvalhost already we just start the remote control and this is the easiest method.
+            changeClientToLocalhost(null, 0);
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.change_client_title)
+                    .setMessage(R.string.change_client_text)
+                    .setPositiveButton(android.R.string.ok, this::changeClientToLocalhost)
+                    .setCancelable(true)
+                    .show();
         }
 
         return true;
@@ -386,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
     private void changeClientToLocalhost(DialogInterface ignore1, int ignore2) {
         setHost("localhost", 1704, 1705);
-//        new Thread(() -> {
+        new Thread(() -> {
             //Give the local server a second to start before we try to connect to it.
             //TODO: Handle this async properly by waiting for the server to start.
             try {
@@ -394,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             } catch (InterruptedException ie) {
             }
             startRemoteControl();
-//        }).start();
+        }).start();
     }
 
     private void addBackgroundProcess() {
@@ -424,8 +423,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     private void stopSnapServer() {
-        if (serverBound)
+        if (serverBound) {
+            if (host.equals("localhost")) {
+                stopSnapClient();
+            }
             snapServerService.stopService();
+        }
 
         removeBackgroundService();
     }
