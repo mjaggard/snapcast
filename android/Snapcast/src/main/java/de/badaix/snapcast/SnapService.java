@@ -103,21 +103,18 @@ public abstract class SnapService extends Service {
             start(intent);
 
 
-            Thread reader = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    BufferedReader bufferedReader = new BufferedReader(
-                            new InputStreamReader(process.getInputStream()));
-                    String line;
-                    try {
-                        while ((line = bufferedReader.readLine()) != null) {
-                            logFromNative(line);
-                        }
-                        process.waitFor();
-                        stop();
-                    } catch (IOException | InterruptedException e) {
-                        Log.wtf(TAG, "Stopping native process", e);
+            Thread reader = new Thread(() -> {
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()));
+                String line;
+                try {
+                    while ((line = bufferedReader.readLine()) != null) {
+                        logFromNative(line);
                     }
+                    process.waitFor();
+                    stop();
+                } catch (IOException | InterruptedException e) {
+                    Log.wtf(TAG, "Stopping native process", e);
                 }
             });
             logReceived = false;

@@ -18,37 +18,22 @@
 
 package de.badaix.snapcast.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 /**
  * Created by johannes on 21.02.16.
  */
 public class Settings {
-    private static Settings instance = null;
-    private Context ctx = null;
+    private final Context ctx;
 
-    public static Settings getInstance(Context context) {
-        if (instance == null) {
-            instance = new Settings();
-        }
-        if (context != null)
-            instance.ctx = context.getApplicationContext();
-
-        return instance;
+    public Settings(Context context) {
+        this.ctx = context;
     }
 
-    public Context getContext() {
-        return ctx;
-    }
-
-    public Resources getResources() {
-        return ctx.getResources();
-    }
-
-    public SharedPreferences getPrefs() {
+    private SharedPreferences getPrefs() {
         return PreferenceManager.getDefaultSharedPreferences(ctx);
     }
 
@@ -66,23 +51,9 @@ public class Settings {
         return this;
     }
 
-    public Settings put(String key, float value) {
-        SharedPreferences.Editor editor = getPrefs().edit();
-        editor.putFloat(key, value);
-        editor.apply();
-        return this;
-    }
-
     public Settings put(String key, int value) {
         SharedPreferences.Editor editor = getPrefs().edit();
         editor.putInt(key, value);
-        editor.apply();
-        return this;
-    }
-
-    public Settings put(String key, long value) {
-        SharedPreferences.Editor editor = getPrefs().edit();
-        editor.putLong(key, value);
         editor.apply();
         return this;
     }
@@ -95,16 +66,8 @@ public class Settings {
         return getPrefs().getBoolean(key, defaultValue);
     }
 
-    public float getFloat(String key, float defaultValue) {
-        return getPrefs().getFloat(key, defaultValue);
-    }
-
     public int getInt(String key, int defaultValue) {
         return getPrefs().getInt(key, defaultValue);
-    }
-
-    public long getLong(String key, long defaultValue) {
-        return getPrefs().getLong(key, defaultValue);
     }
 
     public String getHost() {
@@ -128,9 +91,11 @@ public class Settings {
     }
 
     public void setHost(String host, int streamPort, int controlPort) {
-        put("host", host);
-        put("streamPort", streamPort);
-        put("controlPort", controlPort);
+        SharedPreferences.Editor editor = getPrefs().edit();
+        editor.putString("host", host);
+        editor.putInt("streamPort", streamPort);
+        editor.putInt("controlPort", controlPort);
+        editor.apply();
     }
 
     public String getSpotifyUsername() {
@@ -142,7 +107,9 @@ public class Settings {
     }
 
     public void setSpotifyCredentials(String username, String password) {
-        put("spotifyUsername", username);
-        put("spotifyPassword", password);
+        SharedPreferences.Editor editor = getPrefs().edit();
+        editor.putString("spotifyUsername", username);
+        editor.putString("spotifyPassword", password);
+        editor.apply();
     }
 }

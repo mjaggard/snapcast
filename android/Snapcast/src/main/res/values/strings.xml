@@ -59,5 +59,7 @@
     <string name="spotifyPassword">Spotify Password</string>
     <string name="action_local_server_settings">Local Server Settings</string>
     <string name="local_server">Local Server</string>
+    <string name="change_client_title">Change client settings?</string>
+    <string name="change_client_text">Your client settings are currently not configured for the server that\'s starting. Would you like to change them?</string>
 </resources>
 

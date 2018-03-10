@@ -94,20 +94,17 @@ public class GroupSettingsFragment extends PreferenceFragment {
             }
         }
 
-        prefStreams.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                for (int i = 0; i < streams.size(); ++i) {
-                    if (streamIds[i].equals(newValue)) {
-                        prefStreams.setTitle(streamNames[i]);
+        prefStreams.setOnPreferenceChangeListener((preference, newValue) -> {
+            for (int i = 0; i < streams.size(); ++i) {
+                if (streamIds[i].equals(newValue)) {
+                    prefStreams.setTitle(streamNames[i]);
 //                        client.getConfig().setStream(streamIds[i].toString());
-                        prefStreams.setValueIndex(i);
-                        break;
-                    }
+                    prefStreams.setValueIndex(i);
+                    break;
                 }
-
-                return false;
             }
+
+            return false;
         });
 
 
@@ -123,12 +120,7 @@ public class GroupSettingsFragment extends PreferenceFragment {
                 allClients.add(checkBoxPref);
             }
         }
-        Collections.sort(allClients, new Comparator<CheckBoxPreference>() {
-            @Override
-            public int compare(CheckBoxPreference lhs, CheckBoxPreference rhs) {
-                return lhs.getTitle().toString().compareToIgnoreCase(rhs.getTitle().toString());
-            }
-        });
+        Collections.sort(allClients, (lhs, rhs) -> lhs.getTitle().toString().compareToIgnoreCase(rhs.getTitle().toString()));
         for (CheckBoxPreference pref : allClients)
             prefCatClients.addPreference(pref);
 

@@ -44,6 +44,14 @@
 
         </android.support.v7.widget.Toolbar>
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/server_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+        </android.support.v7.widget.Toolbar>
+
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView

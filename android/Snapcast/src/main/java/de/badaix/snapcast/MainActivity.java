@@ -55,9 +55,11 @@ import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.badaix.snapcast.control.RemoteControl;
@@ -75,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
     private static final int CLIENT_PROPERTIES_REQUEST = 1;
     private static final int GROUP_PROPERTIES_REQUEST = 2;
-    private static final String TAG = "Main";
+    public static final String TAG = "Main";
     private static final String SERVICE_NAME = "Snapcast";// #2";
-    private static final String[] BINARIES = new String[] {"snapclient", "snapserver", "librespot"};
+    private static final String[] BINARIES = new String[]{"snapclient", "snapserver", "librespot"};
     private boolean clientBound;
     private MenuItem miClientStartStop;
     private boolean serverBound;
@@ -167,6 +169,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 //            tvInfo.setText("Sample rate: " + rate + ", buffer size: " + size);
         }
 
+        Toolbar serverToolbar = (Toolbar) findViewById(R.id.server_toolbar);
+        serverToolbar.setTitle(R.string.local_server);
+        serverToolbar.inflateMenu(R.menu.menu_snapcast_server);
+        serverToolbar.setOnMenuItemClickListener(this::onOptionsItemSelected);
+        miServerStartStop = serverToolbar.getMenu().findItem(R.id.action_server_start_stop);
+
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -177,18 +185,15 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         // primary sections of the activity.
 
         groupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.groupListFragment);
-        groupListFragment.setHideOffline(Settings.getInstance(this).getBoolean("hide_offline", false));
+        groupListFragment.setHideOffline(new Settings(this).getBoolean("hide_offline", false));
 
         setActionbarSubtitle("Host: no Snapserver found");
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (String binaryName : BINARIES) {
-                    Log.d(TAG, "copying " + binaryName);
-                    Setup.copyBinAsset(MainActivity.this, binaryName, binaryName);
-                    Log.d(TAG, "done copying " + binaryName);
-                }
+        new Thread(() -> {
+            for (String binaryName : BINARIES) {
+                Log.d(TAG, "copying " + binaryName);
+                Setup.copyBinAsset(MainActivity.this, binaryName, binaryName);
+                Log.d(TAG, "done copying " + binaryName);
             }
         }).start();
 
@@ -206,16 +211,15 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         try {
             pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             final int verCode = pInfo.versionCode;
-            int lastRunVersion = Settings.getInstance(this).getInt("lastRunVersion", 0);
+            int lastRunVersion = new Settings(this).getInt("lastRunVersion", 0);
             Log.d(TAG, "lastRunVersion: " + lastRunVersion + ", version: " + verCode);
             if (lastRunVersion < verCode) {
-                // Place your dialog code here to display the dialog
-                new AlertDialog.Builder(this).setTitle(R.string.first_run_title).setMessage(R.string.first_run_text).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Settings.getInstance(MainActivity.this).put("lastRunVersion", verCode);
-                    }
-                }).setCancelable(true).show();
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.first_run_title)
+                        .setMessage(R.string.first_run_text)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> new Settings(MainActivity.this).put("lastRunVersion", verCode))
+                        .setCancelable(true)
+                        .show();
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Failure showing first run dialog", e);
@@ -227,12 +231,10 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_snapcast, menu);
         miClientStartStop = menu.findItem(R.id.action_play_stop);
-        miServerStartStop = menu.findItem(R.id.action_server_start_stop);
-        miServerStartStop.getIcon().setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
         miSettings = menu.findItem(R.id.action_settings);
 //        miRefresh = menu.findItem(R.id.action_refresh);
         updateStartStopMenuItem();
-        boolean isChecked = Settings.getInstance(this).getBoolean("hide_offline", false);
+        boolean isChecked = new Settings(this).getBoolean("hide_offline", false);
         MenuItem menuItem = menu.findItem(R.id.action_hide_offline);
         menuItem.setChecked(isChecked);
 
@@ -252,8 +254,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             ServerDialogFragment serverDialogFragment = new ServerDialogFragment();
-            serverDialogFragment.setHost(Settings.getInstance(this).getHost(), Settings.getInstance(this).getStreamPort(), Settings.getInstance(this).getControlPort());
-            serverDialogFragment.setAutoStart(Settings.getInstance(this).isAutostart());
+            final Settings settings = new Settings(this);
+            serverDialogFragment.setHost(settings.getHost(), settings.getStreamPort(), settings.getControlPort());
+            serverDialogFragment.setAutoStart(new Settings(this).isAutostart());
             serverDialogFragment.setListener(new ServerDialogFragment.ServerDialogListener() {
                 @Override
                 public void onHostChanged(String host, int streamPort, int controlPort) {
@@ -263,17 +266,14 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
                 @Override
                 public void onAutoStartChanged(boolean autoStart) {
-                    Settings.getInstance(MainActivity.this).setAutostart(autoStart);
+                    settings.setAutostart(autoStart);
                 }
             });
             serverDialogFragment.show(getSupportFragmentManager(), "serverDialogFragment");
 //            NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
             return true;
         } else if (id == R.id.action_local_server_settings) {
-            LocalServerSettingsDialogFragment serverDialogFragment = new LocalServerSettingsDialogFragment();
-            serverDialogFragment.setSpotifyCredentials(spotifyUsername, spotifyPassword);
-            serverDialogFragment.setSpotifyCredentialsListener((username, password) -> setSpotifyCredentials(username, password));
-            serverDialogFragment.show(getSupportFragmentManager(), "localServerDialogFragment");
+            openLocalServerSettings();
             return true;
         } else if (id == R.id.action_play_stop) {
             if (clientBound && snapClientService.isRunning()) {
@@ -288,12 +288,14 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 stopSnapServer();
             } else {
                 item.setEnabled(false); //While starting
-                startSnapServer();
+                if (!startSnapServer()) {
+                    item.setEnabled(true); //Enable again as start button if it didn't start.
+                }
             }
             return true;
         } else if (id == R.id.action_hide_offline) {
             item.setChecked(!item.isChecked());
-            Settings.getInstance(this).put("hide_offline", item.isChecked());
+            new Settings(this).put("hide_offline", item.isChecked());
             groupListFragment.setHideOffline(item.isChecked());
             return true;
         } else if (id == R.id.action_refresh) {
@@ -307,41 +309,50 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         return super.onOptionsItemSelected(item);
     }
 
+    private void openLocalServerSettings() {
+        LocalServerSettingsDialogFragment serverDialogFragment = new LocalServerSettingsDialogFragment();
+        serverDialogFragment.setSpotifyCredentials(spotifyUsername, spotifyPassword);
+        serverDialogFragment.setSpotifyCredentialsListener((username, password) -> setSpotifyCredentials(username, password));
+        serverDialogFragment.show(getSupportFragmentManager(), "localServerDialogFragment");
+    }
+
     private void setSpotifyCredentials(String username, String password) {
         this.spotifyUsername = username;
         this.spotifyPassword = password;
-        Settings.getInstance(this).setSpotifyCredentials(username, password);
+        new Settings(this).setSpotifyCredentials(username, password);
     }
 
     private void updateStartStopMenuItem() {
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        MainActivity.this.runOnUiThread(() -> {
 
-                if (clientBound && snapClientService.isRunning()) {
-                    Log.d(TAG, "updateStartStopMenuItem: ic_media_stop");
-                    miClientStartStop.setIcon(R.drawable.ic_media_stop);
-                } else {
-                    Log.d(TAG, "updateStartStopMenuItem: ic_media_play");
-                    miClientStartStop.setIcon(R.drawable.ic_media_play);
-                }
-                miClientStartStop.setEnabled(true);
-
-                if (serverBound && snapServerService.isRunning()) {
-                    Log.d(TAG, "updateStartStopMenuItem: server ic_media_stop");
-                    miServerStartStop.setIcon(R.drawable.ic_media_stop);
-                    miServerStartStop.setTitle(R.string.action_server_stop);
-                } else {
-                    Log.d(TAG, "updateStartStopMenuItem: server ic_media_play");
-                    miServerStartStop.setIcon(R.drawable.ic_media_play);
-                    miServerStartStop.setTitle(R.string.action_server_start);
-                }
-                miServerStartStop.setEnabled(true);
+            if (clientBound && snapClientService.isRunning()) {
+                Log.d(TAG, "updateStartStopMenuItem: ic_media_stop");
+                miClientStartStop.setIcon(R.drawable.ic_media_stop);
+            } else {
+                Log.d(TAG, "updateStartStopMenuItem: ic_media_play");
+                miClientStartStop.setIcon(R.drawable.ic_media_play);
             }
+            miClientStartStop.setEnabled(true);
+
+            if (serverBound && snapServerService.isRunning()) {
+                Log.d(TAG, "updateStartStopMenuItem: server ic_media_stop");
+                miServerStartStop.setIcon(R.drawable.ic_media_stop);
+                miServerStartStop.setTitle(R.string.action_server_stop);
+            } else {
+                Log.d(TAG, "updateStartStopMenuItem: server ic_media_play");
+                miServerStartStop.setIcon(R.drawable.ic_media_play);
+                miServerStartStop.setTitle(R.string.action_server_start);
+            }
+            miServerStartStop.setEnabled(true);
         });
     }
 
-    private void startSnapServer() {
+    private boolean startSnapServer() {
+        if (TextUtils.isEmpty(spotifyUsername) || TextUtils.isEmpty(spotifyPassword)) {
+            openLocalServerSettings();
+            return false;
+        }
+
         Intent i = new Intent(this, SnapServerService.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.putExtra(SnapServerService.SPOTIFY_USERNAME, spotifyUsername);
@@ -350,6 +361,41 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
         addBackgroundProcess();
         startService(i);
+
+        if (clientUsingLocalhost() || clientIsEmpty()) {
+            //If it is locvalhost already we just start the remote control and this is the easiest method.
+            changeClientToLocalhost(null, 0);
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.change_client_title)
+                    .setMessage(R.string.change_client_text)
+                    .setPositiveButton(android.R.string.ok, this::changeClientToLocalhost)
+                    .setCancelable(true)
+                    .show();
+        }
+
+        return true;
+    }
+
+    private boolean clientUsingLocalhost() {
+        return host != null && host.equals("localhost");
+    }
+
+    private boolean clientIsEmpty() {
+        return TextUtils.isEmpty(host);
+    }
+
+    private void changeClientToLocalhost(DialogInterface ignore1, int ignore2) {
+        setHost("localhost", 1704, 1705);
+        new Thread(() -> {
+            //Give the local server a second to start before we try to connect to it.
+            //TODO: Handle this async properly by waiting for the server to start.
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+            }
+            startRemoteControl();
+        }).start();
     }
 
     private void addBackgroundProcess() {
@@ -379,8 +425,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     private void stopSnapServer() {
-        if (serverBound)
+        if (serverBound) {
+            if (host.equals("localhost")) {
+                stopSnapClient();
+            }
             snapServerService.stopService();
+        }
 
         removeBackgroundService();
     }
@@ -393,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private void startRemoteControl() {
         if (remoteControl == null)
             remoteControl = new RemoteControl(this);
-        if (!host.isEmpty())
+        if (!TextUtils.isEmpty(host))
             remoteControl.connect(host, controlPort);
     }
 
@@ -414,10 +464,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     public void onStart() {
         super.onStart();
 
-        if (TextUtils.isEmpty(Settings.getInstance(this).getHost()))
+        Settings settings = new Settings(this);
+
+        if (TextUtils.isEmpty(settings.getHost()))
             NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
         else
-            setHost(Settings.getInstance(this).getHost(), Settings.getInstance(this).getStreamPort(), Settings.getInstance(this).getControlPort());
+            setHost(settings.getHost(), settings.getStreamPort(), settings.getControlPort());
 
         setSpotifyCredentialsFromSettings();
 
@@ -429,7 +481,8 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     private void setSpotifyCredentialsFromSettings() {
-        setSpotifyCredentials(Settings.getInstance(this).getSpotifyUsername(), Settings.getInstance(this).getSpotifyPassword());
+        Settings settings = new Settings(this);
+        setSpotifyCredentials(settings.getSpotifyUsername(), settings.getSpotifyPassword());
     }
 
     @Override
@@ -502,11 +555,14 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 }
             }
         } else if ("err".equals(logClass) || "Emerg".equals(logClass) || "Alert".equals(logClass) || "Crit".equals(logClass) || "Err".equals(logClass)) {
-            if (warningSamplerateSnackbar != null)
-                warningSamplerateSnackbar.dismiss();
-            warningSamplerateSnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
-                    msg, Snackbar.LENGTH_LONG);
-            warningSamplerateSnackbar.show();
+            if (msg != null && msg.contains("Error reading config: parse error - unexpected end of input")) {
+            } else {
+                if (warningSamplerateSnackbar != null)
+                    warningSamplerateSnackbar.dismiss();
+                warningSamplerateSnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
+                        msg, Snackbar.LENGTH_LONG);
+                warningSamplerateSnackbar.show();
+            }
         }
     }
 
@@ -564,13 +620,10 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
 
     private void setActionbarSubtitle(final String subtitle) {
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null)
-                    actionBar.setSubtitle(subtitle);
-            }
+        MainActivity.this.runOnUiThread(() -> {
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null)
+                actionBar.setSubtitle(subtitle);
         });
     }
 
@@ -581,28 +634,25 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         this.host = host;
         this.port = streamPort;
         this.controlPort = controlPort;
-        Settings.getInstance(this).setHost(host, streamPort, controlPort);
+        new Settings(this).setHost(host, streamPort, controlPort);
     }
 
-    public void updateMenuItems(final boolean connected) {
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (connected) {
-                    if (miSettings != null)
-                        miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                    if (miClientStartStop != null)
-                        miClientStartStop.setVisible(true);
+    private void updateMenuItems(final boolean connected) {
+        this.runOnUiThread(() -> {
+            if (connected) {
+                if (miSettings != null)
+                    miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                if (miClientStartStop != null)
+                    miClientStartStop.setVisible(true);
 //                    if (miRefresh != null)
 //                        miRefresh.setVisible(true);
-                } else {
-                    if (miSettings != null)
-                        miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                    if (miClientStartStop != null)
-                        miClientStartStop.setVisible(false);
+            } else {
+                if (miSettings != null)
+                    miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                if (miClientStartStop != null)
+                    miClientStartStop.setVisible(false);
 //                    if (miRefresh != null)
 //                        miRefresh.setVisible(false);
-                }
             }
         });
     }
