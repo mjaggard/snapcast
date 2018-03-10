@@ -59,6 +59,7 @@ import org.w3c.dom.Text;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.badaix.snapcast.control.RemoteControl;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
     private static final int CLIENT_PROPERTIES_REQUEST = 1;
     private static final int GROUP_PROPERTIES_REQUEST = 2;
-    private static final String TAG = "Main";
+    public static final String TAG = "Main";
     private static final String SERVICE_NAME = "Snapcast";// #2";
     private static final String[] BINARIES = new String[]{"snapclient", "snapserver", "librespot"};
     private boolean clientBound;
@@ -184,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         // primary sections of the activity.
 
         groupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.groupListFragment);
-        groupListFragment.setHideOffline(Settings.getInstance(this).getBoolean("hide_offline", false));
+        groupListFragment.setHideOffline(new Settings(this).getBoolean("hide_offline", false));
 
         setActionbarSubtitle("Host: no Snapserver found");
 
@@ -210,13 +211,13 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         try {
             pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             final int verCode = pInfo.versionCode;
-            int lastRunVersion = Settings.getInstance(this).getInt("lastRunVersion", 0);
+            int lastRunVersion = new Settings(this).getInt("lastRunVersion", 0);
             Log.d(TAG, "lastRunVersion: " + lastRunVersion + ", version: " + verCode);
             if (lastRunVersion < verCode) {
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.first_run_title)
                         .setMessage(R.string.first_run_text)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> Settings.getInstance(MainActivity.this).put("lastRunVersion", verCode))
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> new Settings(MainActivity.this).put("lastRunVersion", verCode))
                         .setCancelable(true)
                         .show();
             }
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         miSettings = menu.findItem(R.id.action_settings);
 //        miRefresh = menu.findItem(R.id.action_refresh);
         updateStartStopMenuItem();
-        boolean isChecked = Settings.getInstance(this).getBoolean("hide_offline", false);
+        boolean isChecked = new Settings(this).getBoolean("hide_offline", false);
         MenuItem menuItem = menu.findItem(R.id.action_hide_offline);
         menuItem.setChecked(isChecked);
 
@@ -253,8 +254,9 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             ServerDialogFragment serverDialogFragment = new ServerDialogFragment();
-            serverDialogFragment.setHost(Settings.getInstance(this).getHost(), Settings.getInstance(this).getStreamPort(), Settings.getInstance(this).getControlPort());
-            serverDialogFragment.setAutoStart(Settings.getInstance(this).isAutostart());
+            final Settings settings = new Settings(this);
+            serverDialogFragment.setHost(settings.getHost(), settings.getStreamPort(), settings.getControlPort());
+            serverDialogFragment.setAutoStart(new Settings(this).isAutostart());
             serverDialogFragment.setListener(new ServerDialogFragment.ServerDialogListener() {
                 @Override
                 public void onHostChanged(String host, int streamPort, int controlPort) {
@@ -264,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
 
                 @Override
                 public void onAutoStartChanged(boolean autoStart) {
-                    Settings.getInstance(MainActivity.this).setAutostart(autoStart);
+                    settings.setAutostart(autoStart);
                 }
             });
             serverDialogFragment.show(getSupportFragmentManager(), "serverDialogFragment");
@@ -293,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             return true;
         } else if (id == R.id.action_hide_offline) {
             item.setChecked(!item.isChecked());
-            Settings.getInstance(this).put("hide_offline", item.isChecked());
+            new Settings(this).put("hide_offline", item.isChecked());
             groupListFragment.setHideOffline(item.isChecked());
             return true;
         } else if (id == R.id.action_refresh) {
@@ -317,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private void setSpotifyCredentials(String username, String password) {
         this.spotifyUsername = username;
         this.spotifyPassword = password;
-        Settings.getInstance(this).setSpotifyCredentials(username, password);
+        new Settings(this).setSpotifyCredentials(username, password);
     }
 
     private void updateStartStopMenuItem() {
@@ -462,10 +464,12 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     public void onStart() {
         super.onStart();
 
-        if (TextUtils.isEmpty(Settings.getInstance(this).getHost()))
+        Settings settings = new Settings(this);
+
+        if (TextUtils.isEmpty(settings.getHost()))
             NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
         else
-            setHost(Settings.getInstance(this).getHost(), Settings.getInstance(this).getStreamPort(), Settings.getInstance(this).getControlPort());
+            setHost(settings.getHost(), settings.getStreamPort(), settings.getControlPort());
 
         setSpotifyCredentialsFromSettings();
 
@@ -477,7 +481,8 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     }
 
     private void setSpotifyCredentialsFromSettings() {
-        setSpotifyCredentials(Settings.getInstance(this).getSpotifyUsername(), Settings.getInstance(this).getSpotifyPassword());
+        Settings settings = new Settings(this);
+        setSpotifyCredentials(settings.getSpotifyUsername(), settings.getSpotifyPassword());
     }
 
     @Override
@@ -629,7 +634,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         this.host = host;
         this.port = streamPort;
         this.controlPort = controlPort;
-        Settings.getInstance(this).setHost(host, streamPort, controlPort);
+        new Settings(this).setHost(host, streamPort, controlPort);
     }
 
     private void updateMenuItems(final boolean connected) {

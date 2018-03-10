@@ -32,9 +32,10 @@ public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
-            if (Settings.getInstance(context).isAutostart()) {
-                String host = Settings.getInstance(context).getHost();
-                int port = Settings.getInstance(context).getStreamPort();
+            Settings settings = new Settings(context);
+            if (settings.isAutostart()) {
+                String host = settings.getHost();
+                int port = settings.getStreamPort();
                 if (TextUtils.isEmpty(host))
                     return;
 
