@@ -37,15 +37,11 @@ public class NsdHelper {
     private static final String TAG = "NsdHelper";
     private static NsdHelper mInstance;
     private String serviceName;
-    private String serviceType;
-    //    private static final String NSD_SERVICE_TYPE = "_http._tcp.";
-    private int mPort;
-    private InetAddress mHost;
     private NsdManager mNsdManager;
-    private android.net.nsd.NsdManager.DiscoveryListener mDiscoveryListener = null;
-    private android.net.nsd.NsdManager.ResolveListener mResolveListener = null;
+    private android.net.nsd.NsdManager.DiscoveryListener mDiscoveryListener;
+    private android.net.nsd.NsdManager.ResolveListener mResolveListener;
     private Context mContext;
-    private NsdHelperListener listener = null;
+    private NsdHelperListener listener;
 
     private NsdHelper(Context context) {
         mContext = context;
@@ -64,12 +60,11 @@ public class NsdHelper {
         stopListening();
         this.listener = listener;
         this.serviceName = serviceName;
-        this.serviceType = serviceType;
+        String serviceType1 = serviceType;
         initializeResolveListener();
         initializeDiscoveryListener();
         mNsdManager = (NsdManager) mContext.getSystemService(Context.NSD_SERVICE);
         mNsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-//        mNsdManager.discoverServices("_snapcast-jsonrpc._tcp.", NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
     }
 
     public void stopListening() {
@@ -133,6 +128,43 @@ public class NsdHelper {
             public void onServiceLost(NsdServiceInfo serviceInfo) {
                 NsdServiceInfo info = serviceInfo;
                 Log.d(TAG, "Service lost: " + info.getServiceName());
+            }
+        };
+    }
+
+    public void startAdvertising(String serviceType, String serviceName, int port) {
+        NsdServiceInfo serviceInfo = new NsdServiceInfo();
+        serviceInfo.setServiceName("NsdChat");
+        serviceInfo.setServiceType("_http._tcp.");
+        serviceInfo.setPort(port);
+
+        mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, createIgnoringListener());
+    }
+
+    public void stopAdvertising() {
+        mNsdManager.unregisterService(createIgnoringListener());
+    }
+
+    private NsdManager.RegistrationListener createIgnoringListener() {
+        return new NsdManager.RegistrationListener() {
+            @Override
+            public void onRegistrationFailed(NsdServiceInfo nsdServiceInfo, int i) {
+
+            }
+
+            @Override
+            public void onUnregistrationFailed(NsdServiceInfo nsdServiceInfo, int i) {
+
+            }
+
+            @Override
+            public void onServiceRegistered(NsdServiceInfo nsdServiceInfo) {
+
+            }
+
+            @Override
+            public void onServiceUnregistered(NsdServiceInfo nsdServiceInfo) {
+
             }
         };
     }

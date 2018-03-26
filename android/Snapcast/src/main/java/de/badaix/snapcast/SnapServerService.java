@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import de.badaix.snapcast.utils.NsdHelper;
+
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 
 /**
@@ -56,6 +58,12 @@ public class SnapServerService extends SnapService {
     @Override
     protected int getNotificationId() {
         return 101;
+    }
+
+    @Override
+    protected void stop() {
+        NsdHelper.getInstance(this).stopAdvertising();
+        super.stop();
     }
 
     @Override
@@ -93,6 +101,8 @@ public class SnapServerService extends SnapService {
                     .command(binary.getAbsolutePath(), "-s", spotifyString)
                     .redirectErrorStream(true)
                     .start();
+
+            NsdHelper.getInstance(this).startAdvertising("_snapcast._tcp.", "Snapcast", 1704);
         } catch (Exception e) {
             Log.e(TAG, "Exception caught while starting server", e);
             if (logListener != null)
