@@ -54,7 +54,8 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
     private int streamPort = 1704;
     private int controlPort = 1705;
     private boolean autoStart = false;
-    private ServerDialogListener listener = null;
+    private ServerDialogListener listener;
+    private final NsdHelper nsdHelper = new NsdHelper();
 
     public void setListener(ServerDialogListener listener) {
         this.listener = listener;
@@ -108,12 +109,19 @@ public class ServerDialogFragment extends DialogFragment implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        NsdHelper.getInstance(getContext()).startListening("_snapcast._tcp.", "Snapcast", new NsdHelper.NsdHelperListener() {
+        nsdHelper.startListening("_snapcast._tcp.", "Snapcast", new NsdHelper.NsdHelperListener() {
             @Override
             public void onResolved(NsdHelper nsdHelper, NsdServiceInfo serviceInfo) {
                 setHost(serviceInfo.getHost().getCanonicalHostName(), serviceInfo.getPort(), serviceInfo.getPort() + 1);
+                nsdHelper.stopListening();
             }
-        });
+        }, getContext());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        nsdHelper.stopListening();
     }
 
     @Override

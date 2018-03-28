@@ -43,6 +43,7 @@ public class SnapServerService extends SnapService {
     private static final String TAG = "Server";
     public static final String SPOTIFY_USERNAME = "SPOTIFY_USERNAME";
     public static final String SPOTIFY_PASSWORD = "snapcast";
+    private final NsdHelper nsdHelper = new NsdHelper();
 
     @Override
     protected NotificationCompat.Builder createStopNotificationBuilder(Intent intent, PendingIntent piStop) {
@@ -62,7 +63,7 @@ public class SnapServerService extends SnapService {
 
     @Override
     protected void stop() {
-        NsdHelper.getInstance(this).stopAdvertising();
+        nsdHelper.stopAdvertising();
         super.stop();
     }
 
@@ -102,7 +103,7 @@ public class SnapServerService extends SnapService {
                     .redirectErrorStream(true)
                     .start();
 
-            NsdHelper.getInstance(this).startAdvertising("_snapcast._tcp.", "Snapcast", 1704);
+            nsdHelper.startAdvertising("_snapcast._tcp.", "Snapcast", 1704, this);
         } catch (Exception e) {
             Log.e(TAG, "Exception caught while starting server", e);
             if (logListener != null)

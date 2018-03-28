@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.PorterDuff;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -55,11 +54,9 @@ import com.google.android.gms.ads.MobileAds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.badaix.snapcast.control.RemoteControl;
@@ -100,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     private CoordinatorLayout coordinatorLayout;
     private Button btnConnect;
     private boolean batchActive;
+    private final NsdHelper nsdHelper = new NsdHelper();
 
     /**
      * Defines callbacks for service binding, passed to bindService()
@@ -467,7 +465,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         Settings settings = new Settings(this);
 
         if (TextUtils.isEmpty(settings.getHost()))
-            NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
+            nsdHelper.startListening("_snapcast._tcp.", SERVICE_NAME, this, this);
         else
             setHost(settings.getHost(), settings.getStreamPort(), settings.getControlPort());
 
@@ -495,7 +493,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     public void onStop() {
         super.onStop();
 
-        NsdHelper.getInstance(this).stopListening();
+        nsdHelper.stopListening();
 // Unbind from the service
         if (clientBound) {
             unbindService(clientConnection);
@@ -662,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
         Log.d(TAG, "resolved: " + serviceInfo);
         setHost(serviceInfo.getHost().getCanonicalHostName(), serviceInfo.getPort(), serviceInfo.getPort() + 1);
         startRemoteControl();
-        NsdHelper.getInstance(this).stopListening();
+        nsdHelper.stopListening();
     }
 
 
