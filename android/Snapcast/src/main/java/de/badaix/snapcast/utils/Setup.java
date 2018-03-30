@@ -19,7 +19,6 @@
 package de.badaix.snapcast.utils;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 

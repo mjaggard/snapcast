@@ -33,11 +33,8 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 
 /**
  * Created by mat on 23/01/18.
