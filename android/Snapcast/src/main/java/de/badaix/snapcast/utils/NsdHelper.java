@@ -36,22 +36,25 @@ public class NsdHelper {
     private static NsdHelper mInstance;
     private String serviceName;
     private NsdManager mNsdManager;
-    private final NsdManager.DiscoveryListener mDiscoveryListener = new ServiceDiscoveryListener();
-    private final NsdManager.ResolveListener mResolveListener = new ServiceResolveListener();
+    private NsdManager.DiscoveryListener mDiscoveryListener;
     private NsdHelperListener listener;
-    private final NsdManager.RegistrationListener ignoringListener = new NullRegistrationListener();
+    private NsdManager.RegistrationListener ignoringListener;
 
     public void startListening(String serviceType, String serviceName, NsdHelperListener listener, Context context) {
         stopListening();
         this.listener = listener;
         this.serviceName = serviceName;
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+        mDiscoveryListener = new ServiceDiscoveryListener();
         mNsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
     }
 
     public void stopListening() {
         try {
-            mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+            if (mDiscoveryListener != null) {
+                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+                mDiscoveryListener = null;
+            }
         } catch (Exception e) {
             Log.wtf(TAG, e);
         }
@@ -97,8 +100,9 @@ public class NsdHelper {
         public void onServiceFound(NsdServiceInfo serviceInfo) {
             NsdServiceInfo info = serviceInfo;
             Log.d(TAG, "Service found: " + info.getServiceName());
-            if (info.getServiceName().equals(serviceName))
-                mNsdManager.resolveService(info, mResolveListener);
+            if (info.getServiceName().equals(serviceName)) {
+                mNsdManager.resolveService(info, new ServiceResolveListener());
+            }
         }
 
         @Override
@@ -132,17 +136,27 @@ public class NsdHelper {
     }
 
     public void startAdvertising(String serviceType, String serviceName, int port, Context context) {
+        stopAdvertising();
+
         NsdServiceInfo serviceInfo = new NsdServiceInfo();
         serviceInfo.setServiceName(serviceName);
         serviceInfo.setServiceType(serviceType);
         serviceInfo.setPort(port);
 
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+        ignoringListener = new NullRegistrationListener();
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, ignoringListener);
     }
 
     public void stopAdvertising() {
-        mNsdManager.unregisterService(ignoringListener);
+        try {
+            if (ignoringListener != null) {
+                mNsdManager.unregisterService(ignoringListener);
+                ignoringListener = null;
+            }
+        } catch (Exception e) {
+            Log.wtf(TAG, e);
+        }
     }
 
     public interface NsdHelperListener {
